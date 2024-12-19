@@ -1,0 +1,83 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+# Java 빌드 파일
+*.class
+*.jar
+*.war
+*.ear
+
+# IntelliJ IDEA 설정 파일
+/.idea
+
+# Gradle 빌드 파일과 캐시
+/.gradle
+/build
+
+# 운영체제 파일
+.DS_Store
+Thumbs.db
+
+# 환경 변수와 설정 파일
+*.env
+*.yml
+application-*.yml
+/secrets
+
+# 로그 파일
+*.log
+
+# Docker 관련 파일
+docker-compose.override.yml
+**/Dockerfile.*
+
+# 기타 캐시 및 IDE 파일
+/.vscode
+/out
+/venv
+/__pycache__/
+
+# Lombok 설정
+lombok.config
+
+# Spring Boot 관련
+/.mvn
+/.idea
+/logs
+
+/.uploads
