@@ -11,6 +11,4 @@ public interface UserService {
  // 이메일 중복 체크
  boolean isUserExists(String email);
 
- // 로그인 검증 추가
- boolean validateLogin(String email, String password, HttpServletResponse res);
 }

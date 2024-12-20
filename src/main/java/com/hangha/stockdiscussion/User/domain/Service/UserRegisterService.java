@@ -51,27 +51,6 @@ public class UserRegisterService implements UserService {
     }
 
 
-    @Override
-    public boolean validateLogin(String email, String password, HttpServletResponse res) {
-        Optional<User> optionalUser = userRepository.findByemail(email);
-
-        if (optionalUser.isEmpty()) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-        }
-
-        User user = optionalUser.get();
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-
-        //JWT 생성 및 쿠키에 저장 후 Response
-        String token = jwtUtil.createToken(user.getUsername(),user.getUserRole());
-        jwtUtil.addJwtToCookie(token,res);
-        return true;  // 로그인 성공
-    }
-
-
 
     private String encodePassword(String rawPassword) {
         return passwordEncoder.encode(rawPassword);

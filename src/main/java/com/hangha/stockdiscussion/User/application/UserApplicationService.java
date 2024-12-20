@@ -3,10 +3,7 @@ package com.hangha.stockdiscussion.User.application;
 import com.hangha.stockdiscussion.User.application.command.RegisterUserCommand;
 import com.hangha.stockdiscussion.User.domain.Service.FileUploadService;
 import com.hangha.stockdiscussion.User.domain.Service.UserService;
-import com.hangha.stockdiscussion.User.domain.entity.User;
-import com.hangha.stockdiscussion.User.dto.LoginRequestDto;
 import com.hangha.stockdiscussion.security.jwt.JwtUtil;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,8 +44,5 @@ public class UserApplicationService {
         userService.registerUser(updatedCommand);
     }
 
-    public boolean login(LoginRequestDto requestDto, HttpServletResponse res) {
-        return userService.validateLogin(requestDto.getEmail(),requestDto.getPassword(),res);
-    }
 
 }
