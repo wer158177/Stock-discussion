@@ -27,9 +27,13 @@ public class UserRequestDto {
 
     private MultipartFile imageFile;
 
+    private boolean admin = false;
+
+    private String adminToken = "";
+
 
 
     public RegisterUserCommand toCommand() {
-        return new RegisterUserCommand(username, email, password, intro, null);
+        return new RegisterUserCommand(username, email, password, intro, null,admin,adminToken);
     }
 }

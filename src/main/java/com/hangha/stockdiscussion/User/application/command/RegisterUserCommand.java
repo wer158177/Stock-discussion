@@ -7,7 +7,10 @@ public record RegisterUserCommand(
         String email,
         String password,
         String intro,
-        String imageUrl
+        String imageUrl,
+        boolean admin,
+        String adminToken
+
 ) {
     public RegisterUserCommand {
         if (username == null || username.isBlank()) {
@@ -18,8 +21,4 @@ public record RegisterUserCommand(
         }
     }
 
-    // 이미지 URL 업데이트 메서드
-    public RegisterUserCommand withImageUrl(String imageUrl) {
-        return new RegisterUserCommand(username, email, password, intro, imageUrl);
-    }
 }

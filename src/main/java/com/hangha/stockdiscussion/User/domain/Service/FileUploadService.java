@@ -1,4 +1,4 @@
-package com.hangha.stockdiscussion.User.common;
+package com.hangha.stockdiscussion.User.domain.Service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

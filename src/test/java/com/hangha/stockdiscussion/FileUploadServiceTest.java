@@ -1,6 +1,6 @@
 package com.hangha.stockdiscussion;
 
-import com.hangha.stockdiscussion.User.common.FileUploadService;
+import com.hangha.stockdiscussion.User.domain.Service.FileUploadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
