@@ -1,6 +1,7 @@
 package com.hangha.stockdiscussion.security.filter;
 
 
+import com.hangha.stockdiscussion.User.domain.entity.UserRoleEnum;
 import com.hangha.stockdiscussion.security.jwt.JwtUtil;
 import com.hangha.stockdiscussion.security.service.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
@@ -20,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+
 @Slf4j(topic = "JWT 검증 및 인가")
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
@@ -32,7 +34,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest req,@NonNull HttpServletResponse res,@NonNull FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest req, @NonNull HttpServletResponse res, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         String tokenValue = jwtUtil.getTokenFromRequest(req);
@@ -40,27 +42,18 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(tokenValue)) {
             // JWT 토큰 substring
             tokenValue = jwtUtil.substringToken(tokenValue);
-            log.info("검증할 토큰: {}", tokenValue);
+            log.info("검증할 액세스 토큰: {}", tokenValue);
 
             if (!jwtUtil.validateToken(tokenValue)) {
-                log.error("유효하지 않은 토큰");
-                res.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                res.getWriter().write("Invalid Token");
+                log.warn("액세스 토큰이 만료되었습니다.");
+                // 만료된 액세스 토큰이 있으면 리프레시 토큰을 검증하기 위한 절차를 다른 곳에서 처리
+                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
-            }
-
-            Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
-
-            try {
+            } else {
+                Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
                 setAuthentication(info.getSubject());
-            } catch (Exception e) {
-                log.error("인증 처리 중 오류 발생: {}", e.getMessage());
-                res.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                res.getWriter().write("Authentication failed: " + e.getMessage());
-                return;
             }
         }
-
         filterChain.doFilter(req, res);
     }
 

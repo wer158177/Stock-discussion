@@ -27,4 +27,9 @@ public class UserController {
         return ResponseEntity.ok("회원가입 성공!");
     }
 
+    @GetMapping("/hello")
+    public String hello() {
+        return "hello";
+    }
+
 }
