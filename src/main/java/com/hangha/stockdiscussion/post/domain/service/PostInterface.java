@@ -9,4 +9,6 @@ public interface PostInterface {
     void writePost(PostWriteCommand command);
     //게시글 수정
     void updatePost(PostUpdateCommand command);
+    //게시글 삭제
+    void deletePost(Long userId,Long postId);
 }

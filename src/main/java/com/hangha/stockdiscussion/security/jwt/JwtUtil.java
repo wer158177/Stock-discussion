@@ -50,14 +50,14 @@ public class JwtUtil {
     /**
      * 액세스 토큰 생성
      */
-    public String createToken(Long userId,String email,String username, UserRoleEnum role) {
+    public String createToken(Long userId, String email, String username, UserRoleEnum role) {
         Date now = new Date();
         System.out.println(secretKey);
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(email)
                         .claim("userId", userId)
-                        .claim("username",username)
+                        .claim("username", username)
                         .claim(AUTHORIZATION_KEY, role)
                         .setExpiration(new Date(now.getTime() + TOKEN_TIME))
                         .setIssuedAt(now)
@@ -68,13 +68,13 @@ public class JwtUtil {
     /**
      * 리프레시 토큰 생성
      */
-    public String createRefreshToken(String email,String username,UserRoleEnum role) {
+    public String createRefreshToken(String email, String username, UserRoleEnum role) {
         Date now = new Date();
 
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(email)
-                        .claim("username",username)
+                        .claim("username", username)
                         .claim(AUTHORIZATION_KEY, role)
                         .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_TIME))
                         .setIssuedAt(now)
@@ -203,6 +203,21 @@ public class JwtUtil {
     }
 
 
+    // 유저 ID를 추출하는 메서드
+    public Long extractUserIdFromToken(HttpServletRequest request) {
+        String tokenValue = getTokenFromRequest(request);
+        if (tokenValue != null) {
+            // "Bearer " 부분 제거
+            String token = substringToken(tokenValue);
 
+            // 토큰 검증
+            if (validateToken(token)) {
+                // 토큰에서 정보 추출
+                Claims claims = getUserInfoFromToken(token);
+                return claims.get("userId", Long.class);
+            }
+        }
+        return null;
 
+    }
 }

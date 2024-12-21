@@ -17,15 +17,15 @@ public class PostApplicationService {
 
     public void postWrite(Long userId, PostRequestDto postRequestDto){
         PostWriteCommand command = postRequestDto.WriteCommand(userId);
-
-        System.out.println(command);
-
         postinterface.writePost(command);
     }
 
     public  void postUpdate(Long userId, PostRequestDto postRequestDto){
         PostUpdateCommand command = postRequestDto.updateCommand(userId);
-
         postinterface.updatePost(command);
+    }
+
+    public  void postDelete(Long userId,Long postId){
+        postinterface.deletePost(postId,userId);
     }
 }

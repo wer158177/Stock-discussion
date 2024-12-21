@@ -24,7 +24,7 @@ public class PostController {
 
     @PostMapping("/write")
     public ResponseEntity<String> write(HttpServletRequest request, @RequestBody PostRequestDto postRequestDto) {
-        Long userId = extractUserIdFromToken(request);
+        Long userId = jwtUtil.extractUserIdFromToken(request);
         postApplicationService.postWrite(userId, postRequestDto);
         return ResponseEntity.ok("작성완료");
     }
@@ -34,26 +34,18 @@ public class PostController {
     public ResponseEntity<String> update(HttpServletRequest request,
                                          @PathVariable Long PostId,
                                          @RequestBody PostRequestDto postRequestDto) {
-        Long userId = extractUserIdFromToken(request);
+        Long userId = jwtUtil.extractUserIdFromToken(request);
         postApplicationService.postUpdate(userId, postRequestDto);
         return ResponseEntity.ok("업데이트 완료");
     }
 
 
-    public Long extractUserIdFromToken(HttpServletRequest request) {
-        String tokenValue = jwtUtil.getTokenFromRequest(request);
-        if (tokenValue != null) {
-            // "Bearer " 부분 제거
-            String token = jwtUtil.substringToken(tokenValue);
-
-            // 토큰 검증
-            if (jwtUtil.validateToken(token)) {
-                // 토큰에서 정보 추출
-                Claims claims = jwtUtil.getUserInfoFromToken(token);
-                return claims.get("userId", Long.class);
-            }
-        }
-        return null;
+    @DeleteMapping("/{PostId}")
+    public ResponseEntity<String> delete(HttpServletRequest request, @PathVariable Long PostId) {
+        Long userId = jwtUtil.extractUserIdFromToken(request);
+        postApplicationService.postDelete(userId,PostId);
+        return ResponseEntity.ok("삭제완료");
     }
+
 
 }
