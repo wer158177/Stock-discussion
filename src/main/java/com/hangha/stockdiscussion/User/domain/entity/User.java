@@ -1,5 +1,6 @@
 package com.hangha.stockdiscussion.User.domain.entity;
 
+import com.hangha.stockdiscussion.post.domain.entity.Post;
 import com.hangha.stockdiscussion.security.domain.RefreshToken;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,6 +41,8 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RefreshToken> refreshTokens;
+
+
 
     public User(Long id ,String username, String password, String email, String intro, String imageUrl,UserRoleEnum userRole,LocalDateTime createdAt) {
         this.id = id;

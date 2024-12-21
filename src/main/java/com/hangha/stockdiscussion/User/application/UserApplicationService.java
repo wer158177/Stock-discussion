@@ -41,6 +41,7 @@ public class UserApplicationService {
                 command.admin(),
                 command.adminToken()
         );
+
         userService.registerUser(updatedCommand);
     }
 

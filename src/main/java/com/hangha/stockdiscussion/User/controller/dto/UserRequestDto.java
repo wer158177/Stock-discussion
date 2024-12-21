@@ -1,4 +1,4 @@
-package com.hangha.stockdiscussion.User.dto;
+package com.hangha.stockdiscussion.User.controller.dto;
 
 import com.hangha.stockdiscussion.User.application.command.RegisterUserCommand;
 import jakarta.validation.constraints.Email;

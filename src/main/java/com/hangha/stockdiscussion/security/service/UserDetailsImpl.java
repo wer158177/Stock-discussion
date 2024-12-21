@@ -2,6 +2,8 @@ package com.hangha.stockdiscussion.security.service;
 
 import com.hangha.stockdiscussion.User.domain.entity.User;
 import com.hangha.stockdiscussion.User.domain.entity.UserRoleEnum;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 
+@Slf4j
 public class UserDetailsImpl implements UserDetails {
 
     private final User user;
@@ -42,7 +45,7 @@ public class UserDetailsImpl implements UserDetails {
 
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(authority));
-
+        log.info("사용자 권한: {}", authority);
         return authorities;
     }
 

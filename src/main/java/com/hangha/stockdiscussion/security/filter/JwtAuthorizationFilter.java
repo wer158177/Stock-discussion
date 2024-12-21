@@ -36,43 +36,77 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest req, @NonNull HttpServletResponse res, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-
+        log.info("JwtAuthorizationFilter 호출됨: 요청 URI = {}", req.getRequestURI());
         String tokenValue = jwtUtil.getTokenFromRequest(req);
 
+        // 토큰 값을 제대로 가져왔는지 확인
         if (StringUtils.hasText(tokenValue)) {
+            log.info("요청에서 받은 토큰: {}", tokenValue);
+
             // JWT 토큰 substring
             tokenValue = jwtUtil.substringToken(tokenValue);
             log.info("검증할 액세스 토큰: {}", tokenValue);
 
             if (!jwtUtil.validateToken(tokenValue)) {
-                log.warn("액세스 토큰이 만료되었습니다.");
-                // 만료된 액세스 토큰이 있으면 리프레시 토큰을 검증하기 위한 절차를 다른 곳에서 처리
-                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                log.warn("액세스 토큰이 만료되었습니다. 토큰: {}", tokenValue);
+                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 상태 코드
                 return;
             } else {
                 Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
+
+                // Claims에서 정보를 제대로 가져오는지 확인
+                if (info == null) {
+                    log.error("토큰에서 사용자 정보를 가져올 수 없습니다.");
+                    res.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 상태 코드
+                    return;
+                }
+
+                log.info("토큰에서 사용자 정보: {}", info.getSubject());
                 setAuthentication(info.getSubject());
             }
+        } else {
+            log.warn("토큰이 요청에 포함되어 있지 않습니다.");
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 상태 코드
         }
-        filterChain.doFilter(req, res);
+
+        filterChain.doFilter(req, res); // 다음 필터로 이동
     }
 
-    // 인증 처리
     private void setAuthentication(String email) {
+        // 빈 SecurityContext 생성
         SecurityContext context = SecurityContextHolder.createEmptyContext();
+
+        // 인증 객체 생성
         Authentication authentication = createAuthentication(email);
+
+        // 로그: 인증 객체가 제대로 생성되었는지 확인
+        log.info("Authentication object created: {}", authentication);
+
+        // SecurityContext에 인증 객체 설정
         context.setAuthentication(authentication);
+
+        // 로그: SecurityContext에 인증 객체 설정 후
+        log.info("SecurityContext set with authentication: {}", context.getAuthentication());
+
+        // SecurityContextHolder에 설정된 인증 객체 저장
         SecurityContextHolder.setContext(context);
+
+        // 로그: 최종적으로 SecurityContext가 저장되었는지 확인
+        log.info("SecurityContextHolder current authentication: {}", SecurityContextHolder.getContext().getAuthentication());
     }
+
 
     // 인증 객체 생성
-    private Authentication createAuthentication(String username) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    private Authentication createAuthentication(String email) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
         if (userDetails == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다: " + username);
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다: " + email);
         }
-
+        log.info(userDetails.getUsername()+" "+userDetails.getAuthorities());
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
+
+
+
 }

@@ -3,7 +3,7 @@ package com.hangha.stockdiscussion.User.controller;
 import com.hangha.stockdiscussion.User.application.UserApplicationService;
 import com.hangha.stockdiscussion.User.application.command.RegisterUserCommand;
 
-import com.hangha.stockdiscussion.User.dto.UserRequestDto;
+import com.hangha.stockdiscussion.User.controller.dto.UserRequestDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,9 +27,5 @@ public class UserController {
         return ResponseEntity.ok("회원가입 성공!");
     }
 
-    @GetMapping("/hello")
-    public String hello() {
-        return "hello";
-    }
 
 }

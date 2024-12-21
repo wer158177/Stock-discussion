@@ -50,12 +50,13 @@ public class JwtUtil {
     /**
      * 액세스 토큰 생성
      */
-    public String createToken(String email,String username, UserRoleEnum role) {
+    public String createToken(Long userId,String email,String username, UserRoleEnum role) {
         Date now = new Date();
-
+        System.out.println(secretKey);
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(email)
+                        .claim("userId", userId)
                         .claim("username",username)
                         .claim(AUTHORIZATION_KEY, role)
                         .setExpiration(new Date(now.getTime() + TOKEN_TIME))
@@ -200,5 +201,8 @@ public class JwtUtil {
         logger.error("Not Found Token");
         throw new NullPointerException("Not Found Token");
     }
+
+
+
 
 }

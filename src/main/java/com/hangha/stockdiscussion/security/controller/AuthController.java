@@ -45,12 +45,13 @@ public class AuthController {
                 // 리프레시 토큰에서 사용자 정보 추출
                 Claims claims = jwtUtil.getUserInfoFromToken(refreshToken);
                 String email = claims.getSubject();  // 클레임에서 email 추출
+                Long userId = (Long) claims.get("userId");
                 String username = claims.get("username").toString();  // username 추출
                 String roleString = claims.get("auth").toString();  // "auth" 클레임에서 역할 추출
                 UserRoleEnum role = UserRoleEnum.valueOf(roleString);  // UserRoleEnum으로 변환
 
                 // 새로운 액세스 토큰 생성
-                String newAccessToken = jwtUtil.createToken(email, username, role);  // 새 액세스 토큰 생성
+                String newAccessToken = jwtUtil.createToken(userId,email,username, role);  // 새 액세스 토큰 생성
 
                 // 새 액세스 토큰 쿠키에 저장
                 jwtUtil.addJwtToCookie(newAccessToken, response);

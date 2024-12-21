@@ -1,6 +1,5 @@
 package com.hangha.stockdiscussion.security.config;
 
-
 import com.hangha.stockdiscussion.security.filter.JwtAuthenticationFilter;
 import com.hangha.stockdiscussion.security.filter.JwtAuthorizationFilter;
 import com.hangha.stockdiscussion.security.jwt.JwtUtil;
@@ -11,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -58,8 +56,8 @@ public class WebSecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // 정적 리소스 허용
-                        .requestMatchers("/api/user/*").permitAll() // '/api/user/**' 경로는 인증 없이 접근 가능
+                        .requestMatchers("/api/user/**").permitAll() // 사용자 관련 경로는 인증 없이 접근 가능
+                        .requestMatchers("/api/post/write").hasAuthority("ROLE_USER") // '/api/post/write' 경로는 USER만 접근 가능
                         .anyRequest().authenticated() // 그 외의 요청은 인증 필요
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT 인증을 위해 세션 비활성화
@@ -72,10 +70,15 @@ public class WebSecurityConfig {
                     return configuration;
                 }))
                 .httpBasic(AbstractHttpConfigurer::disable) // HTTP Basic 인증 비활성화
-                .formLogin(AbstractHttpConfigurer::disable); // 폼 기반 로그인 비활성
+                .formLogin(AbstractHttpConfigurer::disable); // 폼 기반 로그인 비활성화
 
-        http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
+        // 필터 순서 수정
+
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
+
+
         return http.build();
     }
+
 }

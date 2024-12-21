@@ -61,9 +61,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String email = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getEmail(); // 이메일 사용
         String username = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getUsername(); // 사용자 이름
         UserRoleEnum role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getUserRole();
+        Long userId =((UserDetailsImpl) authResult.getPrincipal()).getUser().getId();// 사용자 ID
 
         // 액세스 토큰 생성
-        String accessToken = jwtUtil.createToken(email, username, role); // 이메일과 사용자 이름을 사용하여 액세스 토큰 생성
+        String accessToken = jwtUtil.createToken(userId,email, username, role); // 이메일과 사용자 이름을 사용하여 액세스 토큰 생성
 
         // 리프레시 토큰 생성
         String refreshToken = jwtUtil.createRefreshToken(email, username,role); // 이메일과 사용자 이름을 사용하여 리프레시 토큰 생성
@@ -72,7 +73,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         jwtUtil.addJwtToCookie(accessToken, response);
         jwtUtil.addRefreshTokenToCookie(refreshToken, response);
 
-        Long userId = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getId(); // 사용자 ID
+        log.info(accessToken);
+        log.info(refreshToken);
+
+
         Date tokenExpiration = new Date(System.currentTimeMillis() + REFRESH_TOKEN_TIME); // 리프레시 토큰 만료 시간 설정
         refreshTokenService.saveRefreshToken(userId, refreshToken, tokenExpiration); // 리프레시 토큰 저장
 
