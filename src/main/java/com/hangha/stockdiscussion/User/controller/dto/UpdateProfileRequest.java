@@ -19,7 +19,7 @@ public class UpdateProfileRequest {
     private MultipartFile imageFile;
 
     // Command로 변환
-    public UpdateProfileCommand toCommand() {
-        return new UpdateProfileCommand(username, intro);
+    public UpdateProfileCommand toCommand(String imageFile) {
+        return new UpdateProfileCommand(username, intro,imageFile);
     }
 }

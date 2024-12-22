@@ -70,6 +70,6 @@ public class UserDetailsImpl implements UserDetails {
     // 계정 활성화 여부
     @Override
     public boolean isEnabled() {
-        return true;
+        return user.isVerified(); // 이메일 인증 여부를 활성화 상태로 반환
     }
 }

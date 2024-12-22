@@ -1,10 +1,10 @@
 package com.hangha.stockdiscussion.User.controller;
 
 import com.hangha.stockdiscussion.User.application.UserApplicationService;
-import com.hangha.stockdiscussion.User.application.command.RegisterUserCommand;
 
-import com.hangha.stockdiscussion.User.application.command.UpdateProfileCommand;
+import com.hangha.stockdiscussion.User.controller.dto.UpdateProfileRequest;
 import com.hangha.stockdiscussion.User.controller.dto.UserRequest;
+import com.hangha.stockdiscussion.User.infrastructure.emalisender.EmailVerificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,28 +14,38 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
     private final UserApplicationService userApplicationService;
+    private final EmailVerificationService emailVerificationService;
 
 
-    public UserController(UserApplicationService userApplicationService) {
+    public UserController(UserApplicationService userApplicationService, EmailVerificationService emailVerificationService) {
         this.userApplicationService = userApplicationService;
+        this.emailVerificationService = emailVerificationService;
     }
 
     @PostMapping(value = "/register", consumes = {"multipart/form-data"})
     public ResponseEntity<String> registerUser(
             @ModelAttribute UserRequest requestDto) {
-        RegisterUserCommand command = requestDto.toCommand();
         // 회원가입 서비스 호출 (중복 체크 및 파일 업로드 처리 포함)
-        userApplicationService.registerUser(command, requestDto.getImageFile());
+        userApplicationService.registerUser(requestDto, requestDto.getImageFile());
         return ResponseEntity.ok("회원가입 성공!");
     }
 
-    @PatchMapping("/{userId}/profile")
+
+    @GetMapping("/verify")
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        emailVerificationService.verifyEmail(token);
+        return ResponseEntity.ok("이메일 인증 성공!");
+    }
+
+
+
+    @PatchMapping(value = "/{userId}/profile", consumes = {"multipart/form-data"})
     public ResponseEntity<Void> updateProfile(
             @PathVariable Long userId,
-            @ModelAttribute UpdateProfileCommand command,
+            @ModelAttribute UpdateProfileRequest requestDto,
             @RequestParam(required = false) MultipartFile profileImageFile) {
 
-        userApplicationService.updateProfile(userId, command, profileImageFile);
+        userApplicationService.updateProfile(userId, requestDto, profileImageFile);
         return ResponseEntity.ok().build();
     }
 

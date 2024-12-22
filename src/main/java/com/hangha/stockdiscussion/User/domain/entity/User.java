@@ -43,6 +43,10 @@ public class User {
     private List<RefreshToken> refreshTokens;
 
 
+    @Column(nullable = false)
+    private boolean isVerified = false; // 인증 상태
+
+
     @Builder
     public User(Long id ,String username, String password, String email, String intro, String imageUrl,UserRoleEnum userRole,LocalDateTime createdAt) {
         this.id = id;
@@ -74,6 +78,13 @@ public class User {
     public void changePassword(String newEncodedPassword) {
         this.password = newEncodedPassword;
     }
+
+
+    public void markAsVerified() {
+        this.isVerified = true;
+    }
+
+
 
 
 

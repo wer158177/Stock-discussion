@@ -22,7 +22,13 @@ public class UserRegisterService {
 
     private final String ADMIN_TOKEN = "990226";
 
-    public void registerUser(RegisterUserCommand command) {
+    public Long registerUser(RegisterUserCommand command) {
+        // 1. 회원 중복 체크
+        if (userRepository.existsByEmail(command.email())) {
+            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+        }
+
+
         String encodedPassword = passwordEncoder.encode(command.password());
         User user = User.builder()
                 .username(command.username())
@@ -33,10 +39,12 @@ public class UserRegisterService {
                 .userRole(UserRoleEnum.USER)
                 .createdAt(LocalDateTime.now())
                 .build();
-        userRepository.save(user);
+       userRepository.save(user);
+
+        return user.getId();
     }
 
-    public boolean isUserExists(String email) {
-        return userRepository.existsByEmail(email);
-    }
+
+
+
 }

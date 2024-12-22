@@ -33,7 +33,7 @@ public class UserRequest {
 
 
 
-    public RegisterUserCommand toCommand() {
-        return new RegisterUserCommand(username, email, password, intro, null,admin,adminToken);
+    public RegisterUserCommand toCommand(String imageFile) {
+        return new RegisterUserCommand(username, email, password, intro, imageFile,admin,adminToken);
     }
 }
