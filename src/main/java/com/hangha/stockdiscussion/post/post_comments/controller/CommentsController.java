@@ -25,24 +25,34 @@ public class CommentsController {
     }
 
 
-    @PostMapping("/write")
-    public ResponseEntity<String> write(HttpServletRequest request, @RequestBody CommentsRequestDto commentsRequestDto) {
+    @PostMapping("/{postId}")
+    public ResponseEntity<String> write(
+                                         HttpServletRequest request,
+                                         @PathVariable Long postId,
+                                         @RequestBody CommentsRequestDto commentsRequestDto) {
         Long userId = jwtUtil.extractUserIdFromToken(request);
-        commentsApplicationService.commentWrite(userId, commentsRequestDto);
+        commentsApplicationService.commentWrite(userId,commentsRequestDto);
         return ResponseEntity.ok("댓글 작성완료");
     }
 
     @GetMapping("/{postId}/comments")
-    public ResponseEntity<List<SimpleCommentResponseDto>> fetchComments(@PathVariable Long postId) {
-        List<SimpleCommentResponseDto> comments = commentsApplicationService.commentRead(postId);
-        return ResponseEntity.ok(comments);
+    public ResponseEntity<List<SimpleCommentResponseDto>> getParentComments(@PathVariable Long postId) {
+        List<SimpleCommentResponseDto> parentComments = commentsApplicationService.getParentComments(postId);
+        return ResponseEntity.ok(parentComments);
+    }
+
+    @GetMapping("/{postId}/comments/{parentId}/replies")
+    public ResponseEntity<List<SimpleCommentResponseDto>> getReplies(@PathVariable Long parentId) {
+        List<SimpleCommentResponseDto> replies = commentsApplicationService.getReplies(parentId);
+        return ResponseEntity.ok(replies);
     }
 
 
-    @PutMapping("/{PostId}/{CommentId}")
+
+    @PutMapping("/{PostId}/comments/{commentId}")
     public ResponseEntity<String> update(HttpServletRequest request,
                                          @PathVariable Long PostId,
-                                         @PathVariable Long CommentId,
+                                         @PathVariable Long commentId,
                                          @RequestBody CommentsRequestDto commentsRequestDto) {
         Long userId = jwtUtil.extractUserIdFromToken(request);
         commentsApplicationService.commentUpdate(userId, commentsRequestDto);
@@ -57,6 +67,9 @@ public class CommentsController {
         commentsApplicationService.commentDelete(userId,postId,commentId);
         return ResponseEntity.ok("댓글 삭제완료");
     }
+
+
+
 
 
 }

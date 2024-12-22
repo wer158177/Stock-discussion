@@ -4,48 +4,68 @@ import com.hangha.stockdiscussion.post.post_comments.application.command.Comment
 import com.hangha.stockdiscussion.post.post_comments.application.command.CommentUpdateCommand;
 import com.hangha.stockdiscussion.post.post_comments.controller.dto.SimpleCommentResponseDto;
 import com.hangha.stockdiscussion.post.post_comments.domain.entity.PostComments;
-import com.hangha.stockdiscussion.post.post_comments.domain.service.CommentInterface;
 import com.hangha.stockdiscussion.post.post_comments.controller.dto.CommentsRequestDto;
+import com.hangha.stockdiscussion.post.post_comments.domain.service.CommentService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CommentsApplicationService {
-    private final CommentInterface commentInterface;
+    private final CommentService commentService;
 
-    public CommentsApplicationService(CommentInterface commentInterface) {
-        this.commentInterface = commentInterface;
+    public CommentsApplicationService(CommentService commentService) {
+        this.commentService = commentService;
     }
 
 
     public void commentWrite(Long userId, CommentsRequestDto commentsRequestDto){
         CommentCommand command = commentsRequestDto.writeCommand(userId);
-        commentInterface.writeComment(userId,command);
+        commentService.writeComment(userId,command);
 
     }
     public void commentUpdate(Long userId, CommentsRequestDto commentsRequestDto){
         CommentUpdateCommand command = commentsRequestDto.updateCommand(userId);
-        commentInterface.updateComment(userId,command);
+        commentService.updateComment(userId,command);
 
     }
     public void commentDelete(Long userId,Long commentId,Long postId){
-        commentInterface.deleteComment(userId,commentId,postId);
+        commentService.deleteComment(userId,commentId,postId);
 
     }
 
-    public List<SimpleCommentResponseDto> commentRead(Long postId) {
-        List<PostComments> comments = commentInterface.readComments(postId);
-        return comments.stream()
+
+
+
+
+
+    public List<SimpleCommentResponseDto> getParentComments(Long postId) {
+        // 부모 댓글 조회 및 DTO 변환
+        List<SimpleCommentResponseDto> parentComments = commentService.findParentCommentsByPostId(postId);
+        return parentComments.stream()
                 .map(comment -> new SimpleCommentResponseDto(
                         comment.getId(),
-                        comment.getComment(),
+                        comment.getContent(),
                         comment.getUserId(),
                         comment.getCreatedAt()
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 
+    public List<SimpleCommentResponseDto> getReplies(Long parentId) {
+        // 대댓글 조회 및 DTO 변환
+        List<SimpleCommentResponseDto> replies = commentService.findRepliesByParentId(parentId);
+        return replies.stream()
+                .map(reply -> new SimpleCommentResponseDto(
+                        reply.getId(),
+                        reply.getContent(),
+                        reply.getUserId(),
+                        reply.getCreatedAt()
+                ))
+                .toList();
+    }
 
 }
+
+
+

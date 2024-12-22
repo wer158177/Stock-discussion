@@ -10,8 +10,11 @@ public class ProfileService {
 
     private final UserRepository userRepository;
 
+
+
     public ProfileService(UserRepository userRepository) {
         this.userRepository = userRepository;
+
     }
 
     @Transactional
@@ -26,5 +29,8 @@ public class ProfileService {
         // 변경사항 저장 (JPA 변경 감지)
         userRepository.save(user);
     }
+
+
+
 }
 

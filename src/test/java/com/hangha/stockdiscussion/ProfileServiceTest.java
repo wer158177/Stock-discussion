@@ -8,8 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -59,4 +59,8 @@ class ProfileServiceTest {
         // UserRepository의 save 메서드가 호출되었는지 검증
         verify(userRepository).save(user);
     }
+
+
+
+
 }

@@ -4,5 +4,11 @@ public record CommentUpdateCommand(
         Long userId,
         Long commentId,
         Long postId,
-        String comment) {
+        Long parentId,
+        String content
+) {
+    public boolean isReply() {
+        return parentId != null;
+    }
 }
+

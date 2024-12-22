@@ -38,4 +38,15 @@ public class UserController {
         userApplicationService.updateProfile(userId, command, profileImageFile);
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/{userId}/change-password")
+    public ResponseEntity<String> changePassword(
+            @PathVariable Long userId,
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword) {
+        userApplicationService.changePassword(userId, oldPassword, newPassword);
+        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+    }
+
+
 }

@@ -4,6 +4,7 @@ package com.hangha.stockdiscussion.post.post_comments.controller.dto;
 import com.hangha.stockdiscussion.post.post_comments.application.command.CommentCommand;
 import com.hangha.stockdiscussion.post.post_comments.application.command.CommentUpdateCommand;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,17 +13,20 @@ import lombok.NoArgsConstructor;
 public class CommentsRequestDto {
 
     private Long postId;
+    private Long parentId;
     private Long commentId;
 
     @NotNull
-    private String comment;
+    @Size(min = 1, max = 1000)
+    private String content;
 
 
     public CommentCommand writeCommand(Long userId) {
         return new CommentCommand(
                 userId,
                 this.postId,
-                this.comment  // 내용
+                this.parentId,
+                this.content  // 내용
         );
     }
 
@@ -31,7 +35,8 @@ public class CommentsRequestDto {
                 userId,
                 this.commentId,
                 this.postId,
-                this.comment
+                this.parentId,
+                this.content
         );
     }
 }

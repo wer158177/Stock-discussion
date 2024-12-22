@@ -2,9 +2,11 @@ package com.hangha.stockdiscussion.User.application;
 
 import com.hangha.stockdiscussion.User.application.command.RegisterUserCommand;
 import com.hangha.stockdiscussion.User.application.command.UpdateProfileCommand;
+import com.hangha.stockdiscussion.User.domain.Service.PasswordService;
 import com.hangha.stockdiscussion.User.domain.Service.ProfileService;
 import com.hangha.stockdiscussion.User.domain.Service.UserRegisterService;
 import com.hangha.stockdiscussion.User.infrastructure.fileupload.FileUploadService;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,11 +16,13 @@ public class UserApplicationService {
     private final UserRegisterService userRegisterService;
     private final FileUploadService fileUploadService;
     private final ProfileService profileService;
+    private final PasswordService passwordService;
 
-    public UserApplicationService(UserRegisterService userRegisterService, FileUploadService fileUploadService, ProfileService profileService) {
+    public UserApplicationService(UserRegisterService userRegisterService, FileUploadService fileUploadService, ProfileService profileService, PasswordService passwordService) {
         this.userRegisterService = userRegisterService;
         this.fileUploadService = fileUploadService;
         this.profileService = profileService;
+        this.passwordService = passwordService;
     }
 
     public void registerUser(RegisterUserCommand command, MultipartFile imageFile) {
@@ -58,6 +62,8 @@ public class UserApplicationService {
         profileService.updateProfile(userId, command.username(), command.intro(), profileImageUrl);
     }
 
-
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        passwordService.changePassword(userId, oldPassword, newPassword);
+    }
 
 }

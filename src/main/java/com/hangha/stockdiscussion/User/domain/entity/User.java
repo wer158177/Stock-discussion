@@ -71,6 +71,10 @@ public class User {
         System.out.println("After Update: " + this.username);
     }
 
+    public void changePassword(String newEncodedPassword) {
+        this.password = newEncodedPassword;
+    }
+
 
 
 }
