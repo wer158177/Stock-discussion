@@ -9,6 +9,7 @@ import com.hangha.stockdiscussion.post.post_comments.domain.repository.CommentsR
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class CommentService implements CommentInterface {
@@ -71,5 +72,10 @@ public class CommentService implements CommentInterface {
         // 댓글 삭제
         commentsRepository.delete(comment);
 
+    }
+
+    @Override
+    public List<PostComments> readComments(Long postId) {
+        return commentsRepository.findByPostId(postId); // PostId로 댓글 조회
     }
 }

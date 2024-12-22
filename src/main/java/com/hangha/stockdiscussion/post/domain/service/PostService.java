@@ -1,13 +1,10 @@
 package com.hangha.stockdiscussion.post.domain.service;
 
 
-import com.hangha.stockdiscussion.User.domain.entity.User;
-import com.hangha.stockdiscussion.User.domain.repository.UserRepository;
 import com.hangha.stockdiscussion.post.application.command.PostUpdateCommand;
 import com.hangha.stockdiscussion.post.application.command.PostWriteCommand;
 import com.hangha.stockdiscussion.post.domain.entity.Post;
 import com.hangha.stockdiscussion.post.domain.repository.PostRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

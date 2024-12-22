@@ -1,5 +1,6 @@
 package com.hangha.stockdiscussion.post.domain.entity;
 
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,20 +13,14 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
-public class PostStats {
+public class Tag {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int likes;
+    private String tagName;
 
-    private int commentCount;
-
-    private int viewCount=0;
-
-    private LocalDateTime lastUpdated;
-
-    //해쉬태그 추가해야함
-    private String hashtag;
+    private LocalDateTime createdAt;
 
 }

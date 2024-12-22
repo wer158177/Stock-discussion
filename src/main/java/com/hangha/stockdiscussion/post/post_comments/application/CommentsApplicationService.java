@@ -2,9 +2,14 @@ package com.hangha.stockdiscussion.post.post_comments.application;
 
 import com.hangha.stockdiscussion.post.post_comments.application.command.CommentCommand;
 import com.hangha.stockdiscussion.post.post_comments.application.command.CommentUpdateCommand;
+import com.hangha.stockdiscussion.post.post_comments.controller.dto.SimpleCommentResponseDto;
+import com.hangha.stockdiscussion.post.post_comments.domain.entity.PostComments;
 import com.hangha.stockdiscussion.post.post_comments.domain.service.CommentInterface;
 import com.hangha.stockdiscussion.post.post_comments.controller.dto.CommentsRequestDto;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentsApplicationService {
@@ -29,4 +34,18 @@ public class CommentsApplicationService {
         commentInterface.deleteComment(userId,commentId,postId);
 
     }
+
+    public List<SimpleCommentResponseDto> commentRead(Long postId) {
+        List<PostComments> comments = commentInterface.readComments(postId);
+        return comments.stream()
+                .map(comment -> new SimpleCommentResponseDto(
+                        comment.getId(),
+                        comment.getComment(),
+                        comment.getUserId(),
+                        comment.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
 }

@@ -3,11 +3,14 @@ package com.hangha.stockdiscussion.post.post_comments.controller;
 
 import com.hangha.stockdiscussion.post.post_comments.application.CommentsApplicationService;
 import com.hangha.stockdiscussion.post.post_comments.controller.dto.CommentsRequestDto;
-import com.hangha.stockdiscussion.security.jwt.JwtUtil;
+import com.hangha.stockdiscussion.post.post_comments.controller.dto.SimpleCommentResponseDto;
+import com.hangha.stockdiscussion.User.infrastructure.security.jwt.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/post_comments")
@@ -29,6 +32,12 @@ public class CommentsController {
         return ResponseEntity.ok("댓글 작성완료");
     }
 
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<List<SimpleCommentResponseDto>> fetchComments(@PathVariable Long postId) {
+        List<SimpleCommentResponseDto> comments = commentsApplicationService.commentRead(postId);
+        return ResponseEntity.ok(comments);
+    }
+
 
     @PutMapping("/{PostId}/{CommentId}")
     public ResponseEntity<String> update(HttpServletRequest request,
@@ -48,8 +57,6 @@ public class CommentsController {
         commentsApplicationService.commentDelete(userId,postId,commentId);
         return ResponseEntity.ok("댓글 삭제완료");
     }
-
-
 
 
 }

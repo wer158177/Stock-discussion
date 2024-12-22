@@ -3,8 +3,7 @@ package com.hangha.stockdiscussion.post.controller;
 
 import com.hangha.stockdiscussion.post.application.PostApplicationService;
 import com.hangha.stockdiscussion.post.controller.dto.PostRequestDto;
-import com.hangha.stockdiscussion.security.jwt.JwtUtil;
-import io.jsonwebtoken.Claims;
+import com.hangha.stockdiscussion.User.infrastructure.security.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.ResponseEntity;

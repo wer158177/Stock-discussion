@@ -1,9 +1,9 @@
 package com.hangha.stockdiscussion.User.domain.entity;
 
-import com.hangha.stockdiscussion.post.domain.entity.Post;
-import com.hangha.stockdiscussion.security.domain.RefreshToken;
+import com.hangha.stockdiscussion.User.infrastructure.security.domain.RefreshToken;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -43,7 +43,7 @@ public class User {
     private List<RefreshToken> refreshTokens;
 
 
-
+    @Builder
     public User(Long id ,String username, String password, String email, String intro, String imageUrl,UserRoleEnum userRole,LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
@@ -54,6 +54,23 @@ public class User {
         this.userRole = userRole;
         this.createdAt = createdAt;
     }
+
+
+
+    public void updateProfile(String newUsername, String newIntro, String newProfileImage) {
+        System.out.println("Before Update: " + this.username);
+        if (newUsername != null && !newUsername.isBlank()) {
+            this.username = newUsername;
+        }
+        if (newIntro != null && !newIntro.isBlank()) {
+            this.intro = newIntro;
+        }
+        if (newProfileImage != null && !newProfileImage.isBlank()) {
+            this.imageUrl = newProfileImage;
+        }
+        System.out.println("After Update: " + this.username);
+    }
+
 
 
 }
