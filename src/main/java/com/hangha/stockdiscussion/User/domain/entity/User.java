@@ -1,5 +1,6 @@
 package com.hangha.stockdiscussion.User.domain.entity;
 
+import com.hangha.stockdiscussion.User.application.command.RegisterUserCommand;
 import com.hangha.stockdiscussion.User.infrastructure.security.domain.RefreshToken;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "user")
 public class User {
 
     @Id
@@ -48,7 +50,7 @@ public class User {
 
 
     @Builder
-    public User(Long id ,String username, String password, String email, String intro, String imageUrl,UserRoleEnum userRole,LocalDateTime createdAt) {
+    private User(Long id, String username, String password, String email, String intro, String imageUrl, UserRoleEnum userRole, LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -57,6 +59,19 @@ public class User {
         this.imageUrl = imageUrl;
         this.userRole = userRole;
         this.createdAt = createdAt;
+    }
+
+
+    public static User createUser(RegisterUserCommand command, String encodedPassword) {
+        return User.builder()
+                .username(command.username())
+                .password(encodedPassword)
+                .email(command.email())
+                .intro(command.intro())
+                .imageUrl(command.imageUrl())
+                .userRole(UserRoleEnum.USER)
+                .createdAt(LocalDateTime.now())
+                .build();
     }
 
 
@@ -85,7 +100,11 @@ public class User {
     }
 
 
-
-
+    // 테스트를 위한 생성자
+    public User(Long id, String email, boolean isVerified) {
+        this.id = id;
+        this.email = email;
+        this.isVerified = isVerified;
+    }
 
 }

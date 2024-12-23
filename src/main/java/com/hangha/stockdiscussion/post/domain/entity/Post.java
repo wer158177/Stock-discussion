@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,16 +36,36 @@ public class Post {
 
     private LocalDateTime updatedAt;
 
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PostStatus status;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostLikes> postLikes = new ArrayList<>();
+
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PostStatus postStatus;
+
     @Builder
-    public Post(Long id, Long userId,String title, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    private Post(Long id, Long userId, String title, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.userId = userId;
-        this.title=title;
-        this.content=content;
-        this.createdAt=createdAt;
-        this.updatedAt=updatedAt;
+        this.title = title;
+        this.content = content;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
+    public static Post createPost(Long userId, String title, String content) {
+        Post post = Post.builder()
+                .userId(userId)
+                .title(title)
+                .content(content)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        post.postStatus = new PostStatus(post); // PostStatus 연관관계 설정
+        return post;
+    }
 
 
     @PrePersist
@@ -66,6 +87,8 @@ public class Post {
         this.title = title;
         this.content = content;
     }
+
+
 
 
 

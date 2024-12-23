@@ -11,6 +11,7 @@ import java.util.Date;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "refresh_token")
 public class RefreshToken {
 
     @Id

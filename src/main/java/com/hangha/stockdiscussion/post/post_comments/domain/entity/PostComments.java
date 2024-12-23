@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "post_comments")
 public class PostComments {
 
     @Id
@@ -38,7 +39,7 @@ public class PostComments {
 
 
     @Builder
-    public PostComments(Long id,Post post, Long userId,Long parentId, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    private PostComments(Long id,Post post, Long userId,Long parentId, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.post = post;
         this.userId = userId;
@@ -47,6 +48,23 @@ public class PostComments {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
+    public static PostComments createComment(Post post, Long userId, String content, Long parentId) {
+        return PostComments.builder()
+                .post(post)
+                .userId(userId)
+                .content(content)
+                .parentId(parentId)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+
+
+
+
+
 
     public void updateComment(String newContent) {
         this.content = newContent;

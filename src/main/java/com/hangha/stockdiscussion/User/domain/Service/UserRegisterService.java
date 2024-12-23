@@ -30,19 +30,12 @@ public class UserRegisterService {
 
 
         String encodedPassword = passwordEncoder.encode(command.password());
-        User user = User.builder()
-                .username(command.username())
-                .password(encodedPassword)
-                .email(command.email())
-                .intro(command.intro())
-                .imageUrl(command.imageUrl())
-                .userRole(UserRoleEnum.USER)
-                .createdAt(LocalDateTime.now())
-                .build();
-       userRepository.save(user);
+        User user = User.createUser(command, encodedPassword);
+        userRepository.save(user);
 
         return user.getId();
     }
+
 
 
 

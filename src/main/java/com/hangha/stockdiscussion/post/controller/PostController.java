@@ -4,6 +4,8 @@ package com.hangha.stockdiscussion.post.controller;
 import com.hangha.stockdiscussion.post.application.PostApplicationService;
 import com.hangha.stockdiscussion.post.controller.dto.PostRequestDto;
 import com.hangha.stockdiscussion.User.infrastructure.security.jwt.JwtUtil;
+import com.hangha.stockdiscussion.post.controller.dto.PostStatusResponse;
+import com.hangha.stockdiscussion.post.domain.service.PostStatusService;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.ResponseEntity;
@@ -14,10 +16,11 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
     private final JwtUtil jwtUtil;
     private final PostApplicationService postApplicationService;
-
-    public PostController(JwtUtil jwtUtil, PostApplicationService postApplicationService) {
+    private final PostStatusService postStatusService;
+    public PostController(JwtUtil jwtUtil, PostApplicationService postApplicationService, PostStatusService postStatusService) {
         this.jwtUtil = jwtUtil;
         this.postApplicationService = postApplicationService;
+        this.postStatusService = postStatusService;
     }
 
 
@@ -46,5 +49,35 @@ public class PostController {
         return ResponseEntity.ok("삭제완료");
     }
 
+
+
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<Void> likePost(HttpServletRequest request, @RequestParam Long postId) {
+        Long userId = jwtUtil.extractUserIdFromToken(request);
+        postApplicationService.likePost(postId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{postId}/like")
+    public ResponseEntity<Void> unlikePost(HttpServletRequest request, @RequestParam Long postId) {
+        Long userId = jwtUtil.extractUserIdFromToken(request);
+        postApplicationService.unlikePost(postId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    // 조회수 증가
+    @PostMapping("/{postId}/view")
+    public ResponseEntity<Void> increaseViewCount(@PathVariable Long postId) {
+        postStatusService.increaseViewCount(postId);
+        return ResponseEntity.ok().build();
+    }
+
+
+    // 특정 게시글의 상태 조회
+    @GetMapping("/{postId}/status")
+    public ResponseEntity<PostStatusResponse> getPostStatus(@PathVariable Long postId) {
+        PostStatusResponse postStatus = postApplicationService.getPostStatus(postId);
+        return ResponseEntity.ok(postStatus);
+    }
 
 }

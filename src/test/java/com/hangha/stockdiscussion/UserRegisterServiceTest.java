@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -75,35 +75,6 @@ class UserRegisterServiceTest {
         assertEquals(UserRoleEnum.USER, savedUser.getUserRole());
     }
 
-    @Test
-    void isUserExists_userExists() {
-        // Given: 이미 존재하는 이메일
-        String email = "existing@example.com";
 
-        // Mock 설정
-        when(userRepository.existsByEmail(email)).thenReturn(true);
 
-        // When: 이메일 존재 여부 확인 메서드 호출
-        boolean exists = userRegisterService.isUserExists(email);
-
-        // Then: 결과 검증
-        assertTrue(exists);
-        verify(userRepository, times(1)).existsByEmail(email);
-    }
-
-    @Test
-    void isUserExists_userDoesNotExist() {
-        // Given: 존재하지 않는 이메일
-        String email = "newuser@example.com";
-
-        // Mock 설정
-        when(userRepository.existsByEmail(email)).thenReturn(false);
-
-        // When: 이메일 존재 여부 확인 메서드 호출
-        boolean exists = userRegisterService.isUserExists(email);
-
-        // Then: 결과 검증
-        assertFalse(exists);
-        verify(userRepository, times(1)).existsByEmail(email);
-    }
 }

@@ -41,12 +41,12 @@ public class CommentsController {
         return ResponseEntity.ok(parentComments);
     }
 
+
     @GetMapping("/{postId}/comments/{parentId}/replies")
     public ResponseEntity<List<SimpleCommentResponseDto>> getReplies(@PathVariable Long parentId) {
         List<SimpleCommentResponseDto> replies = commentsApplicationService.getReplies(parentId);
         return ResponseEntity.ok(replies);
     }
-
 
 
     @PutMapping("/{PostId}/comments/{commentId}")
@@ -68,6 +68,19 @@ public class CommentsController {
         return ResponseEntity.ok("댓글 삭제완료");
     }
 
+
+
+    @PostMapping("/{commentId}/like")
+    public ResponseEntity<Void> likeComment(@PathVariable Long commentId, @RequestParam Long userId) {
+        commentsApplicationService.likeComment(commentId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{commentId}/like")
+    public ResponseEntity<Void> unlikeComment(@PathVariable Long commentId, @RequestParam Long userId) {
+        commentsApplicationService.unlikeComment(commentId, userId);
+        return ResponseEntity.ok().build();
+    }
 
 
 

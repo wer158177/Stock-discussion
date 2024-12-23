@@ -194,107 +194,31 @@ class CommentServiceTest {
         verify(commentsRepository, times(1)).delete(reply);
     }
 
-
+    // 대대댓글 작성 방지 테스트: 대대댓글을 작성하려고 할 때 예외가 발생하는지 검증
     @Test
-    void findParentCommentsByPostId_shouldReturnOnlyParentComments() {
-        // 부모 댓글만 조회하는 테스트
+    void writeComment_shouldThrowExceptionWhenGrandChildComment() {
+        Long userId = 1L;
+        Long postId = 100L;
+        Long parentId = 200L; // 부모 댓글 ID
+        String replyText = "This is a grandchild reply";
 
-        // Given
-        Long postId = 1L; // 테스트용 게시글 ID
-
-        // 게시글 객체 생성 및 ID 설정
-        Post post = new Post(); // 실제 게시글 객체 생성
-        ReflectionTestUtils.setField(post, "id", postId); // Reflection을 사용하여 ID 설정
-
-        // 부모 댓글 1 생성
-        PostComments parentComment1 = PostComments.builder()
-                .id(101L) // 댓글 ID
-                .post(post) // 게시글과 연결
-                .parentId(null) // 부모 댓글이므로 parentId는 null
-                .userId(1L) // 작성자 ID
-                .content("Parent comment 1") // 댓글 내용
-                .createdAt(LocalDateTime.now()) // 생성 시간
+        // Mock 설정: 게시글과 부모 댓글이 존재하며, 부모 댓글이 이미 대댓글인 경우
+        Post post = new Post();
+        PostComments parentComment = PostComments.builder()
+                .id(parentId)
+                .post(post)
+                .content("Child comment") // 부모가 대댓글
+                .parentId(150L) // 부모 댓글의 부모 ID가 존재
                 .build();
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+        when(commentsRepository.findById(parentId)).thenReturn(Optional.of(parentComment));
 
-        // 부모 댓글 2 생성
-        PostComments parentComment2 = PostComments.builder()
-                .id(102L) // 댓글 ID
-                .post(post) // 게시글과 연결
-                .parentId(null) // 부모 댓글이므로 parentId는 null
-                .userId(2L) // 작성자 ID
-                .content("Parent comment 2") // 댓글 내용
-                .createdAt(LocalDateTime.now()) // 생성 시간
-                .build();
+        // 대대댓글 작성 요청 생성
+        CommentCommand command = new CommentCommand(userId, postId, parentId, replyText);
 
-        // Mock 설정: 주어진 게시글 ID로 부모 댓글만 반환
-        when(commentsRepository.findByPostIdAndParentIdIsNull(postId))
-                .thenReturn(List.of(parentComment1, parentComment2));
-
-        // When
-        // 부모 댓글 조회 메서드 호출
-        List<SimpleCommentResponseDto> result = commentService.findParentCommentsByPostId(postId);
-
-        // Then
-        // 부모 댓글 수 검증
-        assertThat(result).hasSize(2);
-
-        // 첫 번째 댓글 검증
-        assertThat(result.get(0).getId()).isEqualTo(101L);
-        assertThat(result.get(0).getContent()).isEqualTo("Parent comment 1");
-
-        // 두 번째 댓글 검증
-        assertThat(result.get(1).getId()).isEqualTo(102L);
-        assertThat(result.get(1).getContent()).isEqualTo("Parent comment 2");
+        // When & Then: 대대댓글 작성 시 예외 발생 검증
+        assertThrows(RuntimeException.class, () -> commentService.writeComment(userId, command), "대대댓글은 허용되지 않습니다.");
     }
-
-    @Test
-    void findRepliesByParentId_shouldReturnOnlyReplies() {
-        // 특정 부모 댓글에 대한 대댓글 조회 테스트
-
-        // Given
-        Long parentId = 101L; // 테스트용 부모 댓글 ID
-
-        // 대댓글 1 생성
-        PostComments reply1 = PostComments.builder()
-                .id(201L) // 대댓글 ID
-                .parentId(parentId) // 부모 댓글 ID 설정
-                .userId(3L) // 작성자 ID
-                .content("Reply 1") // 대댓글 내용
-                .createdAt(LocalDateTime.now()) // 생성 시간
-                .build();
-
-        // 대댓글 2 생성
-        PostComments reply2 = PostComments.builder()
-                .id(202L) // 대댓글 ID
-                .parentId(parentId) // 부모 댓글 ID 설정
-                .userId(4L) // 작성자 ID
-                .content("Reply 2") // 대댓글 내용
-                .createdAt(LocalDateTime.now()) // 생성 시간
-                .build();
-
-        // Mock 설정: 주어진 부모 댓글 ID로 대댓글만 반환
-        when(commentsRepository.findRepliesByParentId(parentId))
-                .thenReturn(List.of(reply1, reply2));
-
-        // When
-        // 대댓글 조회 메서드 호출
-        List<SimpleCommentResponseDto> result = commentService.findRepliesByParentId(parentId);
-
-        // Then
-        // 대댓글 수 검증
-        assertThat(result).hasSize(2);
-
-        // 첫 번째 대댓글 검증
-        assertThat(result.get(0).getId()).isEqualTo(201L);
-        assertThat(result.get(0).getContent()).isEqualTo("Reply 1");
-
-        // 두 번째 대댓글 검증
-        assertThat(result.get(1).getId()).isEqualTo(202L);
-        assertThat(result.get(1).getContent()).isEqualTo("Reply 2");
-    }
-
-
-
 
 
 
