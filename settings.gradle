@@ -1,1 +1,19 @@
 rootProject.name = 'StockDiscussion'
+
+include 'User'
+findProject(':User')?.name = 'user'
+
+include 'post'
+findProject(':post')?.name = 'post'
+
+include 'Post_Comments'
+findProject(':Post_Comments')?.name = 'post_comments'
+
+include 'common'
+findProject(':common')?.name = 'common'
+
+include 'infrastructure'
+findProject(':infrastructure')?.name = 'infrastructure'
+include 'EmailSender'
+include 'SpringSecurity'
+

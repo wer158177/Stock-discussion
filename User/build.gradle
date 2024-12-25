@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' // Spring Boot 플러그인 활성화
+    id 'io.spring.dependency-management'
+}
+
+group = 'com.hangha'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    implementation project(':EmailSender')
+    implementation project(':infrastructure')
+    implementation project(':SpringSecurity')
+    implementation project(':common')
+    compileOnly 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+}
+
+test {
+    useJUnitPlatform()
+}

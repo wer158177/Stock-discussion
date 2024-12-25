@@ -1,0 +1,106 @@
+package com.hangha.controller;
+
+
+import com.hangha.controller.dto.CommentCountRequest;
+import com.hangha.controller.dto.PostRequestDto;
+import com.hangha.controller.dto.PostStatusResponse;
+import com.hangha.domain.service.PostService;
+import com.hangha.application.PostApplicationService;
+
+import com.hangha.domain.service.PostStatusService;
+
+import com.hangha.jwt.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/post")
+public class PostController {
+    private final JwtUtil jwtUtil;
+    private final PostApplicationService postApplicationService;
+    private final PostStatusService postStatusService;
+    private final PostService postService;
+    public PostController(JwtUtil jwtUtil, PostApplicationService postApplicationService, PostStatusService postStatusService, PostService postService) {
+        this.jwtUtil = jwtUtil;
+        this.postApplicationService = postApplicationService;
+        this.postStatusService = postStatusService;
+        this.postService = postService;
+    }
+
+
+    @PostMapping("/write")
+    public ResponseEntity<String> write(HttpServletRequest request, @RequestBody PostRequestDto postRequestDto) {
+        Long userId = jwtUtil.extractUserIdFromToken(request);
+        System.out.println(userId);
+        postApplicationService.postWrite(userId, postRequestDto);
+        return ResponseEntity.ok("작성완료");
+    }
+
+
+    @PutMapping("/{PostId}")
+    public ResponseEntity<String> update(HttpServletRequest request,
+                                         @PathVariable Long PostId,
+                                         @RequestBody PostRequestDto postRequestDto) {
+        Long userId = jwtUtil.extractUserIdFromToken(request);
+        postApplicationService.postUpdate(userId, postRequestDto);
+        return ResponseEntity.ok("업데이트 완료");
+    }
+
+
+    @DeleteMapping("/{PostId}")
+    public ResponseEntity<String> delete(HttpServletRequest request, @PathVariable Long PostId) {
+        Long userId = jwtUtil.extractUserIdFromToken(request);
+        postApplicationService.postDelete(userId,PostId);
+        return ResponseEntity.ok("삭제완료");
+    }
+
+
+
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<Void> likePost(HttpServletRequest request, @RequestParam Long postId) {
+        Long userId = jwtUtil.extractUserIdFromToken(request);
+        postApplicationService.likePost(postId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{postId}/like")
+    public ResponseEntity<Void> unlikePost(HttpServletRequest request, @RequestParam Long postId) {
+        Long userId = jwtUtil.extractUserIdFromToken(request);
+        postApplicationService.unlikePost(postId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    // 조회수 증가
+    @PostMapping("/{postId}/view")
+    public ResponseEntity<Void> increaseViewCount(@PathVariable Long postId) {
+        postStatusService.increaseViewCount(postId);
+        return ResponseEntity.ok().build();
+    }
+
+
+    // 특정 게시글의 상태 조회
+    @GetMapping("/{postId}/status")
+    public ResponseEntity<PostStatusResponse> getPostStatus(@PathVariable Long postId) {
+        PostStatusResponse postStatus = postApplicationService.getPostStatus(postId);
+        return ResponseEntity.ok(postStatus);
+    }
+
+
+    //댓글에서 게시글조회
+    @GetMapping("/{postId}/exists")
+    public ResponseEntity<Boolean> checkPostExists(@PathVariable Long postId) {
+        boolean exists = postService.existsById(postId);
+        return ResponseEntity.ok(exists);
+    }
+
+    //댓글작성시 댓글수 증가
+    @PostMapping("/{postId}/comments/countUp")
+    public ResponseEntity<Void> updateCommentsCount(@PathVariable Long postId, CommentCountRequest commentCountRequest) {
+        postApplicationService. updateCommentsCount(commentCountRequest);
+        return ResponseEntity.ok().build();
+    }
+
+
+}
