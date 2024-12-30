@@ -3,9 +3,10 @@ package com.hangha.userservice.infrastructure.security.filter;
 
 
 
+import com.hangha.common.JwtUtil;
 import com.hangha.userservice.domain.entity.User;
 import com.hangha.userservice.domain.repository.UserRepository;
-import com.hangha.userservice.infrastructure.security.jwt.JwtUtil;
+
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;

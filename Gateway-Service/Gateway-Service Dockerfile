@@ -1,0 +1,6 @@
+FROM openjdk:21-jdk-slim
+WORKDIR /app
+COPY build/libs/Gateway-Service-0.0.1-SNAPSHOT.jar app.jar
+ENV SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+ENV JWT_SECRET_KEY=${JWT_SECRET_KEY}
+ENTRYPOINT ["java", "-jar", "app.jar"]

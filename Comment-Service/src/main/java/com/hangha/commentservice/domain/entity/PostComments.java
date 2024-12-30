@@ -1,6 +1,6 @@
 package com.hangha.commentservice.domain.entity;
 
-import com.hangha.stockdiscussion.post.domain.entity.Post;
+
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,9 +18,8 @@ public class PostComments {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")  // 게시글과 연결되는 외래키
-    private Post post;
+
+    private Long postId;
 
     @Column(nullable = true) // 부모 댓글 ID (null이면 일반 댓글)
     private Long parentId;
@@ -39,9 +38,9 @@ public class PostComments {
 
 
     @Builder
-    private PostComments(Long id,Post post, Long userId,Long parentId, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    private PostComments(Long id,Long postId, Long userId,Long parentId, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
-        this.post = post;
+        this.postId = postId;
         this.userId = userId;
         this.parentId = parentId;
         this.content = content;
@@ -49,9 +48,9 @@ public class PostComments {
         this.updatedAt = updatedAt;
     }
 
-    public static PostComments createComment(Post post, Long userId, String content, Long parentId) {
+    public static PostComments createComment(Long postId, Long userId, String content, Long parentId) {
         return PostComments.builder()
-                .post(post)
+                .postId(postId)
                 .userId(userId)
                 .content(content)
                 .parentId(parentId)

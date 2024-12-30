@@ -2,9 +2,11 @@ package com.hangha.userservice.infrastructure.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.hangha.common.JwtUtil;
 import com.hangha.userservice.domain.entity.UserRoleEnum;
 import com.hangha.userservice.infrastructure.security.dto.LoginRequestDto;
-import com.hangha.userservice.infrastructure.security.jwt.JwtUtil;
+
+import com.hangha.userservice.infrastructure.security.dto.TokenResponse;
 import com.hangha.userservice.infrastructure.security.service.RefreshTokenService;
 import com.hangha.userservice.infrastructure.security.service.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
@@ -19,8 +21,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
-@Slf4j(topic = "로그인 및 JWT 생성")
+@Slf4j(topic = "JwtAuthenticationFilter")
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
@@ -53,36 +56,46 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             throw new RuntimeException("로그인 요청이 잘못되었습니다.");
         }
     }
+
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication authResult) throws IOException, ServletException {
         log.info("로그인 성공 및 JWT 생성");
 
         // 사용자 정보 가져오기
-        String email = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getEmail(); // 이메일 사용
-        String username = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getUsername(); // 사용자 이름
-        UserRoleEnum role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getUserRole();
-        Long userId =((UserDetailsImpl) authResult.getPrincipal()).getUser().getId();// 사용자 ID
+        String email = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getEmail();
+        String username = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getUsername();
+        String role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getUserRole().name();
+        Long userId = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getId();
 
         // 액세스 토큰 생성
-        String accessToken = jwtUtil.createToken(userId,email, username, role); // 이메일과 사용자 이름을 사용하여 액세스 토큰 생성
+        String accessToken = jwtUtil.createToken(userId, email, username, role);
 
         // 리프레시 토큰 생성
-        String refreshToken = jwtUtil.createRefreshToken(email, username,role); // 이메일과 사용자 이름을 사용하여 리프레시 토큰 생성
-
-        // 쿠키에 추가
-        jwtUtil.addJwtToCookie(accessToken, response);
-        jwtUtil.addRefreshTokenToCookie(refreshToken, response);
-
-        log.info(accessToken);
-        log.info(refreshToken);
+        String refreshToken = jwtUtil.createRefreshToken(email, username, role);
 
 
-        Date tokenExpiration = new Date(System.currentTimeMillis() + REFRESH_TOKEN_TIME); // 리프레시 토큰 만료 시간 설정
-        refreshTokenService.saveRefreshToken(userId, refreshToken, tokenExpiration); // 리프레시 토큰 저장
+        log.info("엑세스토큰{}", accessToken);
+        log.info("리프레시토큰{}", refreshToken);
+        log.info("액세스 토큰과 리프레시 토큰 쿠키 설정 완료");
 
-        log.info("액세스 토큰과 리프레시 토큰 발급 완료");
+        // 쿠키에 토큰 설정 (엑세스 토큰과 리프레시 토큰)
+        jwtUtil.addCookie("ACCESS_TOKEN", accessToken, response, 3600);
+        jwtUtil.addCookie("REFRESH_TOKEN", refreshToken, response, (int) REFRESH_TOKEN_TIME );
+
+        // 리프레시 토큰 저장 (DB 등)
+        Date tokenExpiration = new Date(System.currentTimeMillis() + REFRESH_TOKEN_TIME);
+        refreshTokenService.saveRefreshToken(userId, refreshToken, tokenExpiration);
+
+        // 추가적으로 JSON 응답을 보낼 수도 있음 (선택 사항)
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.writeValue(response.getWriter(), Map.of("message", "로그인 성공"));
     }
+
+
 
 
     @Override

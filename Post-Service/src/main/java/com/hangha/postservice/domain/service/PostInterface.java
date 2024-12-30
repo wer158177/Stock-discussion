@@ -6,7 +6,7 @@ import com.hangha.postservice.application.command.PostWriteCommand;
 
 public interface PostInterface {
     //게시글작성
-    void writePost(PostWriteCommand command);
+    Long writePost(PostWriteCommand command);
     //게시글 수정
     void updatePost(PostUpdateCommand command);
     //게시글 삭제

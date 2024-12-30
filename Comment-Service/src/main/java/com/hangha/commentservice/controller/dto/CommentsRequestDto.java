@@ -1,8 +1,9 @@
 package com.hangha.commentservice.controller.dto;
 
 
-import com.hangha.stockdiscussion.post_comments.application.command.CommentCommand;
-import com.hangha.stockdiscussion.post_comments.application.command.CommentUpdateCommand;
+
+import com.hangha.commentservice.application.command.CommentCommand;
+import com.hangha.commentservice.application.command.CommentUpdateCommand;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;

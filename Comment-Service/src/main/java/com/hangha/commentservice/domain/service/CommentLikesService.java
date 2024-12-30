@@ -1,7 +1,8 @@
 package com.hangha.commentservice.domain.service;
 
-import com.hangha.stockdiscussion.post_comments.domain.entity.CommentLikes;
-import com.hangha.stockdiscussion.post_comments.domain.entity.PostComments;
+
+import com.hangha.commentservice.domain.entity.CommentLikes;
+import com.hangha.commentservice.domain.entity.PostComments;
 import com.hangha.commentservice.domain.repository.CommentLikesRepository;
 import com.hangha.commentservice.domain.repository.CommentsRepository;
 import org.springframework.stereotype.Service;

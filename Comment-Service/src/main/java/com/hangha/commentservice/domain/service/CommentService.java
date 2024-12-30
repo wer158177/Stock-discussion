@@ -1,13 +1,20 @@
 package com.hangha.commentservice.domain.service;
 
-import com.hangha.stockdiscussion.post.domain.entity.Post;
-import com.hangha.stockdiscussion.post_comments.application.command.CommentCommand;
-import com.hangha.stockdiscussion.post_comments.application.command.CommentUpdateCommand;
-import com.hangha.stockdiscussion.post_comments.domain.entity.PostComments;
+
+
+import com.hangha.commentservice.application.command.CommentCommand;
+import com.hangha.commentservice.application.command.CommentUpdateCommand;
+import com.hangha.commentservice.feignclient.PostFeignClient;
+import com.hangha.commentservice.domain.entity.PostComments;
 import com.hangha.commentservice.domain.repository.CommentsRepository;
-import com.hangha.stockdiscussion.post.domain.repository.PostRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
+
+
+
 
 import java.util.List;
 
@@ -15,22 +22,24 @@ import java.util.List;
 public class CommentService {
 
     private final CommentsRepository commentsRepository;
-    private final PostRepository postRepository;
+    private final PostFeignClient postFeignClient;
 
-    public CommentService(CommentsRepository commentsRepository, PostRepository postRepository) {
+
+    public CommentService(CommentsRepository commentsRepository, PostFeignClient postFeignClient) {
         this.commentsRepository = commentsRepository;
-        this.postRepository = postRepository;
+        this.postFeignClient = postFeignClient;
+
     }
 
     @Transactional
     public void writeComment(Long userId, CommentCommand command) {
-        Post post = findPostById(command.postId());
-
+        isPostAvailable(command.postId());
         validateParentComment(command.parentId());
-
-        PostComments comment = PostComments.createComment(post, userId, command.content(), command.parentId());
+        PostComments comment = PostComments.createComment(command.postId(), userId, command.content(), command.parentId());
+        postFeignClient.updateCommentCount(command.postId(),true);
         commentsRepository.save(comment);
     }
+
 
     @Transactional
     public void updateComment(Long userId, CommentUpdateCommand command) {
@@ -42,15 +51,15 @@ public class CommentService {
         comment.onUpdate();
 
         commentsRepository.save(comment);
+
     }
 
     @Transactional
     public void deleteComment(Long postId, Long userId, Long commentId) {
         PostComments comment = findCommentById(commentId);
-
         validateUserAuthorization(comment.getUserId(), userId);
-
         if (comment.getParentId() == null) {
+            postFeignClient.updateCommentCount(comment.getPostId(), false);
             commentsRepository.deleteRepliesByParentId(comment.getId());
         }
 
@@ -65,11 +74,8 @@ public class CommentService {
         return commentsRepository.findRepliesByParentId(parentId);
     }
 
-    // Helper method: Post 조회
-    private Post findPostById(Long postId) {
-        return postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-    }
+
+
 
     // Helper method: 댓글 조회
     private PostComments findCommentById(Long commentId) {
@@ -94,6 +100,9 @@ public class CommentService {
         }
     }
 
+    public boolean isPostAvailable(Long postId) {
+        return postFeignClient.doesPostExist(postId);
+    }
 
 
 }

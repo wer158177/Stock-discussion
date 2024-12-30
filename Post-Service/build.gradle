@@ -17,10 +17,21 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    set('springCloudVersion', "2023.0.4")
+}
+
 dependencies {
 
+    // Kafka Producer/Consumer 기능 제공
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // JSON 직렬화/역직렬화를 위한 Jackson
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+
+    implementation project(':common')
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-logging'
@@ -38,9 +49,9 @@ dependencies {
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
 
-    //email전송
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
 
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
 
     // JUnit 5
@@ -53,6 +64,13 @@ dependencies {
     // AssertJ
     testImplementation 'org.assertj:assertj-core:3.24.2'
 }
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
 
 tasks.named('test') {
     useJUnitPlatform()

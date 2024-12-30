@@ -1,7 +1,8 @@
 package com.hangha.commentservice.domain.repository;
 
-import com.hangha.stockdiscussion.post_comments.domain.entity.CommentLikes;
-import com.hangha.stockdiscussion.post_comments.domain.entity.PostComments;
+
+import com.hangha.commentservice.domain.entity.CommentLikes;
+import com.hangha.commentservice.domain.entity.PostComments;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
