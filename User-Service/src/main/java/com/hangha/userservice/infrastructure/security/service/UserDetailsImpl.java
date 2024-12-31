@@ -3,6 +3,7 @@ package com.hangha.userservice.infrastructure.security.service;
 
 import com.hangha.userservice.domain.entity.User;
 import com.hangha.userservice.domain.entity.UserRoleEnum;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 
+@Getter
 @Slf4j
 public class UserDetailsImpl implements UserDetails {
 
@@ -18,10 +20,6 @@ public class UserDetailsImpl implements UserDetails {
 
     public UserDetailsImpl(User user) {
         this.user = user;
-    }
-
-    public User getUser() {
-        return user;
     }
 
     // 사용자 비밀번호 반환

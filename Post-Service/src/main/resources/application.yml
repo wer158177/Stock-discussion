@@ -1,0 +1,77 @@
+server:
+  port: 8083  # 서비스 포트
+
+spring:
+  application:
+    name: post-service  # 서비스 이름
+
+  profiles:
+    active: default  # 활성화할 프로파일
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/Stock_discussion  # MySQL 연결 URL
+    username: root  # 데이터베이스 사용자명
+    password: 4029  # 데이터베이스 비밀번호
+    driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL JDBC 드라이버
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # JPA Hibernate 자동 DDL 생성 옵션
+    show-sql: true  # SQL 쿼리 로그 출력 여부
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect  # MySQL Dialect 설정
+
+
+
+    jwt:
+      secret:
+        key: ${JWT_SECRET_KEY:8385662e486a14c11b9dd23f7338d2696f88bb6074eb4f19bf9933ecd9673c09}  # JWT 비밀 키
+
+devtools:
+  restart:
+    enabled: true  # 자동 재시작 활성화 여부
+  livereload:
+    enabled: true  # 라이브 리로드 활성화 여부
+  additional-paths: src/main/java  # 추가 경로 설정
+
+mvc:
+  cors:
+    mappings:
+      "/api/**":
+        allowed-origins: "http://localhost:8000"  # CORS 허용된 origin
+        allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"  # 허용되는 HTTP 메서드
+        allowed-headers: "*"  # 허용되는 헤더
+        allow-credentials: true  # 자격 증명 허용 여부
+
+logging:
+  level:
+    org.springframework.security: DEBUG  # Spring Security 디버그 로그 레벨
+    org.springframework.web: DEBUG  # Spring Web 디버그 로그 레벨
+
+kafka:
+  bootstrap-servers: localhost:9092  # Kafka 서버 주소
+  producer:
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer  # Kafka 프로듀서 키 직렬화기
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer  # Kafka 프로듀서 값 직렬화기
+    properties:
+      spring.json.trusted.packages: "com.hangha.common.event.model"  # 직렬화할 패키지 명시
+      spring.json.value.default.type: com.hangha.common.event.model.UserActivityEvent  # 기본 직렬화 타입 설정
+
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka}
+#      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
+
+  instance:
+    lease-renewal-interval-in-seconds: ${EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS:10}
+    lease-expiration-duration-in-seconds: ${EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS:30}
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:true}
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    non-secure-port-enabled: true
+    metadata-map:
+      instanceId: ${spring.application.name}:${random.value}

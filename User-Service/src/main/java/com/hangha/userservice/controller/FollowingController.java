@@ -16,29 +16,31 @@ public class FollowingController {
         this.followingApplicationService = followingApplicationService;
     }
 
-    @PostMapping("/{followerId}/follow/{followingId}")
+    @PostMapping("/{followingId}/follow")
     public ResponseEntity<Void> followUser(
-            @PathVariable Long followerId,
+            @RequestHeader("X-Claim-userId") Long userId,
             @PathVariable Long followingId) {
-        followingApplicationService.followUser(followerId, followingId);
-        return ResponseEntity.ok().build();
+        followingApplicationService.followUser(userId, followingId);
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 
-    @DeleteMapping("/{followerId}/unfollow/{followingId}")
+    @DeleteMapping("/{followingId}/unfollow")
     public ResponseEntity<Void> unfollowUser(
-            @PathVariable Long followerId,
+            @RequestHeader("X-Claim-userId") Long userId,
             @PathVariable Long followingId) {
-        followingApplicationService.unfollowUser(followerId, followingId);
-        return ResponseEntity.ok().build();
+        followingApplicationService.unfollowUser(userId, followingId);
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 
     @GetMapping("/{userId}/followers")
     public ResponseEntity<List<Long>> getFollowers(@PathVariable Long userId) {
-        return ResponseEntity.ok(followingApplicationService.getFollowers(userId));
+        List<Long> followers = followingApplicationService.getFollowers(userId);
+        return ResponseEntity.ok(followers);
     }
 
     @GetMapping("/{userId}/following")
     public ResponseEntity<List<Long>> getFollowing(@PathVariable Long userId) {
-        return ResponseEntity.ok(followingApplicationService.getFollowing(userId));
+        List<Long> following = followingApplicationService.getFollowing(userId);
+        return ResponseEntity.ok(following);
     }
 }

@@ -1,6 +1,7 @@
 package com.hangha.commentservice.domain.service;
 
 
+import com.hangha.commentservice.application.command.CommentEventResult;
 import com.hangha.commentservice.domain.entity.CommentLikes;
 import com.hangha.commentservice.domain.entity.PostComments;
 import com.hangha.commentservice.domain.repository.CommentLikesRepository;
@@ -19,7 +20,7 @@ public class CommentLikesService {
     }
 
 
-    public void likeComment(Long commentId, Long userId) {
+    public CommentEventResult likeComment(Long commentId, Long userId) {
         PostComments comment = commentsRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
 
@@ -29,10 +30,16 @@ public class CommentLikesService {
 
         CommentLikes commentLike = new CommentLikes(comment, userId);
         commentLikesRepository.save(commentLike);
+
+        return new CommentEventResult(
+                comment.getId(),
+                comment.getParentId(),
+                comment.getParentId() !=null
+        );
     }
 
 
-    public void unlikeComment(Long commentId, Long userId) {
+    public CommentEventResult unlikeComment(Long commentId, Long userId) {
         PostComments comment = commentsRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
 
@@ -40,5 +47,11 @@ public class CommentLikesService {
                 .orElseThrow(() -> new RuntimeException("좋아요를 누르지 않은 댓글입니다."));
 
         commentLikesRepository.delete(commentLike);
+
+        return new CommentEventResult(
+                comment.getId(),
+                comment.getParentId(),
+                comment.getParentId() !=null
+        );
     }
 }

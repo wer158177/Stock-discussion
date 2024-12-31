@@ -1,0 +1,83 @@
+server:
+  port: 8084
+
+
+spring:
+  application:
+    name: comment-service # 서비스 이름
+
+  post-service:
+    url: http://localhost:8083
+
+
+  profiles:
+    active: default
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/Stock_discussion
+    username: root
+    password: 4029
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  kafka:
+    bootstrap-servers: localhost:9092  # Kafka 서버 주소
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer  # Kafka 프로듀서 키 직렬화기
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer  # Kafka 프로듀서 값 직렬화기
+      properties:
+        spring.json.trusted.packages: "com.hangha.common.event.model"  # 직렬화할 패키지 명시
+        spring.json.value.default.type: com.hangha.common.event.model.UserActivityEvent  # 기본 직렬화 타입 설정
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka}
+
+  instance:
+    lease-renewal-interval-in-seconds: ${EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS:10}
+    lease-expiration-duration-in-seconds: ${EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS:30}
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:true}
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    non-secure-port-enabled: true
+    metadata-map:
+      instanceId: ${spring.application.name}:${random.value}
+
+    jwt:
+      secret:
+        key: ${JWT_SECRET_KEY:8385662e486a14c11b9dd23f7338d2696f88bb6074eb4f19bf9933ecd9673c09}
+
+
+devtools:
+  restart:
+    enabled: true
+  livereload:
+    enabled: true
+  additional-paths: src/main/java
+
+
+
+
+mvc:
+  cors:
+    mappings:
+      "/api/**":
+        allowed-origins: "http://localhost:8000"
+        allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+        allowed-headers: "*"
+        allow-credentials: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+

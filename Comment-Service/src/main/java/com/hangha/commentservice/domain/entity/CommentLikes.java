@@ -13,7 +13,7 @@ public class CommentLikes {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id", nullable = false)
+    @JoinColumn(name = "post_comment_id", nullable = false)
     private PostComments comment;
 
     @Column(name = "user_id", nullable = false)

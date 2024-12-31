@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -32,8 +34,13 @@ public class PostComments {
 
     private LocalDateTime updatedAt;
 
-    //테이블 따로관리
-    private int likes;
+    // 대댓글 리스트 (부모 댓글을 기준으로 관리)
+    @OneToMany(mappedBy = "parentId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostComments> childComments = new ArrayList<>();
+
+    // 좋아요 리스트
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentLikes> likes = new ArrayList<>();
 
 
 

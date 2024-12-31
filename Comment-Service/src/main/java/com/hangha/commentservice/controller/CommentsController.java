@@ -56,6 +56,7 @@ public class CommentsController {
                                          @PathVariable Long commentId,
                                          @RequestBody CommentsRequestDto commentsRequestDto) {
         commentsApplicationService.commentUpdate(userId, commentsRequestDto);
+        System.out.println(commentsRequestDto.getContent());
         return ResponseEntity.ok("댓글 업데이트 완료");
     }
 
@@ -69,15 +70,19 @@ public class CommentsController {
 
 
 
-    @PostMapping("/{commentId}/like")
-    public ResponseEntity<Void> likeComment(@PathVariable Long commentId, @RequestHeader("X-Claim-userId")Long userId) {
-        commentsApplicationService.likeComment(commentId, userId);
+    @PostMapping("/{postId}/{commentId}/like")
+    public ResponseEntity<Void> likeComment(@PathVariable Long commentId,
+                                            @PathVariable Long postId,
+                                            @RequestHeader("X-Claim-userId")Long userId) {
+        commentsApplicationService.likeComment(commentId, userId,postId);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{commentId}/like")
-    public ResponseEntity<Void> unlikeComment(@PathVariable Long commentId,@RequestHeader("X-Claim-userId")Long userId) {
-        commentsApplicationService.unlikeComment(commentId, userId);
+    @DeleteMapping("/{postId}/{commentId}/like")
+    public ResponseEntity<Void> unlikeComment(@PathVariable Long commentId,
+                                              @PathVariable Long postId,
+                                              @RequestHeader("X-Claim-userId")Long userId) {
+        commentsApplicationService.unlikeComment(commentId, userId,postId);
         return ResponseEntity.ok().build();
     }
 

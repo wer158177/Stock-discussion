@@ -29,6 +29,7 @@ public class PostLikesService {
         // 좋아요 추가
         PostLikes postLike = new PostLikes(post, userId);
         postLikesRepository.save(postLike);
+
     }
 
 

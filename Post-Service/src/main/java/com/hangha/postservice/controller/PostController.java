@@ -43,7 +43,7 @@ public class PostController {
 
 
     @PutMapping("/{PostId}")
-    public ResponseEntity<String> update( @RequestHeader("X-Claim-userId") Long userId,
+    public ResponseEntity<String> update(@RequestHeader("X-Claim-userId") Long userId,
                                          @PathVariable Long PostId,
                                          @RequestBody PostRequestDto postRequestDto) {
         postApplicationService.postUpdate(userId, postRequestDto);

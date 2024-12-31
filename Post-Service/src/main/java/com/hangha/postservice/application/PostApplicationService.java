@@ -35,7 +35,6 @@ public class PostApplicationService {
        Long postId = postinterface.writePost(command);
         UserActivityEvent event = UserActivityEventFactory.createPostCreateEvent(userId,postId, postRequestDto);
         producer.sendActivityEvent(event);
-
     }
 
     public  void postUpdate(Long userId, PostRequestDto postRequestDto){
@@ -43,7 +42,6 @@ public class PostApplicationService {
         postinterface.updatePost(command);
         UserActivityEvent event = UserActivityEventFactory.createPostUpdateEvent(userId, command.postId(),postRequestDto);
         producer.sendActivityEvent(event);
-
     }
 
     public  void postDelete(Long userId,Long postId){

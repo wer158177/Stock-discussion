@@ -3,6 +3,7 @@ package com.hangha.commentservice.domain.service;
 
 
 import com.hangha.commentservice.application.command.CommentCommand;
+import com.hangha.commentservice.application.command.CommentEventResult;
 import com.hangha.commentservice.application.command.CommentUpdateCommand;
 import com.hangha.commentservice.feignclient.PostFeignClient;
 import com.hangha.commentservice.domain.entity.PostComments;
@@ -32,17 +33,23 @@ public class CommentService {
     }
 
     @Transactional
-    public void writeComment(Long userId, CommentCommand command) {
+    public CommentEventResult writeComment(Long userId, CommentCommand command) {
         isPostAvailable(command.postId());
         validateParentComment(command.parentId());
         PostComments comment = PostComments.createComment(command.postId(), userId, command.content(), command.parentId());
         postFeignClient.updateCommentCount(command.postId(),true);
         commentsRepository.save(comment);
+        return new CommentEventResult(
+                comment.getId(),
+                comment.getParentId(),
+                comment.getParentId() != null // parentId가 존재하면 대댓글로 간주
+        );
     }
 
 
     @Transactional
-    public void updateComment(Long userId, CommentUpdateCommand command) {
+    public CommentEventResult updateComment(Long userId, CommentUpdateCommand command) {
+        isPostAvailable(command.postId());
         PostComments comment = findCommentById(command.commentId());
 
         validateUserAuthorization(comment.getUserId(), userId);
@@ -52,10 +59,17 @@ public class CommentService {
 
         commentsRepository.save(comment);
 
+        return  new CommentEventResult(
+                comment.getId(),
+                comment.getParentId(),
+                comment.getParentId() != null // parentId가 존재하면 대댓글로 간주
+        );
+
     }
 
     @Transactional
-    public void deleteComment(Long postId, Long userId, Long commentId) {
+    public CommentEventResult deleteComment(Long postId, Long userId, Long commentId) {
+        isPostAvailable(postId);
         PostComments comment = findCommentById(commentId);
         validateUserAuthorization(comment.getUserId(), userId);
         if (comment.getParentId() == null) {
@@ -64,7 +78,18 @@ public class CommentService {
         }
 
         commentsRepository.delete(comment);
+
+        return  new CommentEventResult(
+                comment.getId(),
+                comment.getParentId(),
+                comment.getParentId() != null // parentId가 존재하면 대댓글로 간주
+        );
     }
+
+
+
+
+
 
     public List<PostComments> findParentCommentsByPostId(Long postId) {
         return commentsRepository.findByPostIdAndParentIdIsNull(postId);
@@ -100,6 +125,8 @@ public class CommentService {
         }
     }
 
+
+    //게시글확인
     public boolean isPostAvailable(Long postId) {
         return postFeignClient.doesPostExist(postId);
     }
