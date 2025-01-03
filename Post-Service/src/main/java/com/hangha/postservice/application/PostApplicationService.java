@@ -8,6 +8,7 @@ import com.hangha.postservice.controller.dto.PostStatusResponse;
 import com.hangha.postservice.domain.service.PostInterface;
 import com.hangha.postservice.domain.service.PostLikesService;
 import com.hangha.postservice.domain.service.PostStatusService;
+import com.hangha.postservice.domain.service.TagService;
 import com.hangha.postservice.event.UserActivityEventFactory;
 import com.hangha.postservice.event.producer.UserActivityProducer;
 import org.springframework.stereotype.Service;
@@ -18,21 +19,24 @@ public class PostApplicationService {
     private final PostInterface postinterface;
     private final PostStatusService postStatusService;
     private final PostLikesService postLikesService;
+    private final TagService tagService;
     private final UserActivityProducer producer;
 
 
-    public PostApplicationService(PostInterface postinterface, PostStatusService postStatusService, PostLikesService postLikesService, UserActivityProducer producer) {
+    public PostApplicationService(PostInterface postinterface, PostStatusService postStatusService, PostLikesService postLikesService, TagService tagService, UserActivityProducer producer) {
         this.postinterface = postinterface;
         this.postStatusService = postStatusService;
-
         this.postLikesService = postLikesService;
+        this.tagService = tagService;
         this.producer = producer;
     }
 
 
+    @Transactional
     public void postWrite(Long userId, PostRequestDto postRequestDto){
         PostWriteCommand command = postRequestDto.WriteCommand(userId);
-       Long postId = postinterface.writePost(command);
+        Long postId = postinterface.writePost(command);
+        tagService.saveTags(command.tags(), postId);
         UserActivityEvent event = UserActivityEventFactory.createPostCreateEvent(userId,postId, postRequestDto);
         producer.sendActivityEvent(event);
     }

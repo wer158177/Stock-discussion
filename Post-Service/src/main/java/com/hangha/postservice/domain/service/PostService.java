@@ -83,4 +83,14 @@ public class PostService implements PostInterface {
     }
 
 
+
+    // 랜덤 게시글 조회
+    public List<PostResponseDto> getRandomPosts(int size) {
+        return postRepository.findRandomPostsOptimized(size)
+                .stream()
+                .map(post -> new PostResponseDto(post.getId(), post.getTitle(), post.getContent()))
+                .collect(Collectors.toList());
+    }
+
+
 }

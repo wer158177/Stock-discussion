@@ -29,8 +29,6 @@ public class Post {
 
     private String content;
 
-//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<PostComments> comments = new ArrayList<>();
 
     private LocalDateTime createdAt;
 
@@ -45,15 +43,22 @@ public class Post {
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private PostStatus postStatus;
 
+
+
+
     @Builder
-    private Post(Long id, Long userId, String title, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    private Post(Long id, Long userId, String title, String content, LocalDateTime createdAt, LocalDateTime updatedAt, List<PostHashtag> postHashtags) {
         this.id = id;
         this.userId = userId;
         this.title = title;
         this.content = content;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+
     }
+
+
+
 
     public static Post createPost(Long userId, String title, String content) {
         Post post = Post.builder()

@@ -3,6 +3,7 @@ package com.hangha.userservice.controller;
 import com.hangha.userservice.application.FollowingApplicationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -33,10 +34,13 @@ public class FollowingController {
     }
 
     @GetMapping("/{userId}/followers")
-    public ResponseEntity<List<Long>> getFollowers(@PathVariable Long userId) {
-        List<Long> followers = followingApplicationService.getFollowers(userId);
+    public ResponseEntity<List<Long>> getFollowers(@PathVariable("userId") Long userId,
+                                                   @RequestParam("cursor") Long cursor,
+                                                   @RequestParam("size") int size) {
+        List<Long> followers = followingApplicationService.getFollowers(userId, cursor, size);
         return ResponseEntity.ok(followers);
     }
+
 
     @GetMapping("/{userId}/following")
     public ResponseEntity<List<Long>> getFollowing(@PathVariable Long userId) {

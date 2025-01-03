@@ -1,8 +1,8 @@
-package com.hangha.activityservice.domain.Service;
+package com.hangha.activityservice.infrastructure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hangha.activityservice.domain.entity.TargetType;
-import com.hangha.activityservice.domain.entity.UserActivityLog;
+
+import com.hangha.activityservice.application.UserActivityApplicationService;
 import com.hangha.activityservice.domain.repository.UserActivityRepository;
 import com.hangha.common.event.model.UserActivityEvent;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -13,10 +13,12 @@ public class UserActivityConsumer {
 
     private final UserActivityRepository logRepository;
     private final ObjectMapper objectMapper; // ObjectMapper를 사용하여 JSON을 객체로 변환
+    private final UserActivityApplicationService userActivityApplicationService;
 
-    public UserActivityConsumer(UserActivityRepository logRepository, ObjectMapper objectMapper) {
+    public UserActivityConsumer(UserActivityRepository logRepository, ObjectMapper objectMapper, UserActivityApplicationService userActivityApplicationService) {
         this.logRepository = logRepository;
         this.objectMapper = objectMapper;
+        this.userActivityApplicationService = userActivityApplicationService;
     }
 
     @KafkaListener(topics = "user-activity-topic", groupId = "user-activity-log-group")
@@ -26,22 +28,9 @@ public class UserActivityConsumer {
             UserActivityEvent event = objectMapper.readValue(eventJson, UserActivityEvent.class);
             System.out.println("Consumed event: " + event.toString());
 
-            // Enum 변환
-            TargetType targetType = TargetType.valueOf(event.getTargetType());
-            System.out.println("Converted targetType: " + targetType); // Enum 변환 후 로그
 
-            // 로그 생성
-            UserActivityLog log = UserActivityLog.builder()
-                    .userId(event.getUserId())
-                    .activityType(event.getActivityType())
-                    .targetId(event.getTargetId())
-                    .targetType(targetType)
-                    .metadata(event.getMetadata())
-                    .build();
+            userActivityApplicationService.handleUserActivity(event);
 
-            // DB 저장
-            logRepository.save(log);
-            System.out.println("Log saved: " + log);  // 정상적인 로그 출력
 
         } catch (IllegalArgumentException e) {
             System.err.println("Invalid targetType: " + eventJson);

@@ -8,6 +8,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 public class PostRequestDto {
@@ -19,13 +21,15 @@ public class PostRequestDto {
 
     @NotNull
     private String title;
+    private List<String> tags;
 
 
     public PostWriteCommand WriteCommand(Long userId) {
         return new PostWriteCommand(
                 userId,
                 this.title,   // 제목
-                this.content  // 내용
+                this.content,  // 내용
+                this.tags
         );
     }
 
@@ -34,7 +38,8 @@ public class PostRequestDto {
                 userId,
                 this.postId,
                 this.title,   // 제목
-                this.content  // 내용
+                this.content, // 내용
+                this.tags
         );
     }
 

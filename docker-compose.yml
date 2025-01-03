@@ -16,6 +16,19 @@ services:
     # networks:
     #   - msa-network
 
+  postgres:
+    image: postgres:15
+    container_name: postgresdb
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: stock_service
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
   # Zookeeper
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
@@ -43,3 +56,4 @@ services:
 
 volumes:
   db_data:
+  postgres_data:

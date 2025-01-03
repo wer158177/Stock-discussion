@@ -32,8 +32,8 @@ public class JwtUtil {
     private final long TOKEN_TIME = 60 * 60 * 1000L;                    // 액세스 토큰 1시간
     private final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L;  // 리프레시 토큰 7일
 
-    @Value("${JWT_SECRET_KEY}")
-    private String secretKey;
+//    @Value("${JWT_SECRET_KEY}")
+    private String secretKey="8385662e486a14c11b9dd23f7338d2696f88bb6074eb4f19bf9933ecd9673c09";
 
     private Key key;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;

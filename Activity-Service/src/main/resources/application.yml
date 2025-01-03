@@ -5,6 +5,10 @@ spring:
   application:
     name: activity-service # 서비스 이름
 
+  user-service:
+    url: http://localhost:8082
+
+
   profiles:
     active: default
 

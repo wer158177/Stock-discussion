@@ -1,17 +1,24 @@
 package com.hangha.userservice.domain.Service;
 
 import com.hangha.userservice.domain.entity.Following;
+
 import com.hangha.userservice.domain.repository.FollowingRepository;
 import com.hangha.userservice.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FollowingService {
 
     private final FollowingRepository followingRepository;
+
     private final UserRepository userRepository;
 
     public FollowingService(FollowingRepository followingRepository, UserRepository userRepository) {
@@ -47,16 +54,16 @@ public class FollowingService {
         followingRepository.deleteByFollowerIdAndFollowingId(followerId, followingId);
     }
 
-    public List<Long> getFollowers(Long userId) {
-        validateUserExists(userId);
-        return followingRepository.findAllByFollowingId(userId).stream()
-                .map(Following::getFollowerId)
-                .toList();
+    // 커서 기반 페이징으로 팔로워 목록 가져오기
+    public List<Long> getFollowers(Long userId, Long cursor, int size) {
+        // 커서 기반 페이징 처리
+        Pageable pageable = PageRequest.of(0, size);  // 커서 기반으로 데이터를 가져오므로 페이지는 0으로 고정
+        return followingRepository.findFollowersByFollowingId(userId, cursor, pageable); // 커서 기준으로 팔로워 조회
     }
 
     public List<Long> getFollowing(Long userId) {
         validateUserExists(userId);
-        return followingRepository.findAllByFollowerId(userId).stream()
+        return followingRepository.findAllByFollowingId(userId).stream()
                 .map(Following::getFollowingId)
                 .toList();
     }

@@ -99,12 +99,22 @@ public class PostController {
         postStatusService.updateCommentCount(postId, increment);
     }
 
-    @GetMapping
+
+
+    //필요없어질수도있음
+    @GetMapping()
     public ResponseEntity<List<PostResponseDto>> getPosts(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size) {
         List<PostResponseDto> posts = postService.getPosts(page, size);
         return ResponseEntity.ok(posts);
+    }
+
+
+    // 랜덤 게시글 조회 API
+    @GetMapping("/random")
+    public List<PostResponseDto> getRandomPosts(@RequestParam(defaultValue = "10") int size) {
+        return postService.getRandomPosts(size);
     }
 
 

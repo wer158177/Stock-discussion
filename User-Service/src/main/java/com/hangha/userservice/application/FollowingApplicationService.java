@@ -5,6 +5,7 @@ import com.hangha.userservice.domain.Service.FollowingService;
 import com.hangha.userservice.infrastructure.event.UserActivityEventFactory;
 import com.hangha.userservice.infrastructure.event.UserActivityProducer;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -33,8 +34,8 @@ public class FollowingApplicationService {
         userActivityProducer.sendActivityEvent(unfollowEvent);
     }
 
-    public List<Long> getFollowers(Long userId) {
-        return followingService.getFollowers(userId);
+    public List<Long> getFollowers(Long userId, Long cursor, int size) {
+        return followingService.getFollowers(userId, cursor, size);
     }
 
     public List<Long> getFollowing(Long userId) {
