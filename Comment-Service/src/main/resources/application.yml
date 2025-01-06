@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: 8085
 
 
 spring:
@@ -8,6 +8,8 @@ spring:
 
   post-service:
     url: http://localhost:8083
+  user-service:
+    url: http://localhost:8082
 
 
   profiles:

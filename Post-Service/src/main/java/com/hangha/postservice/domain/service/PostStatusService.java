@@ -1,10 +1,12 @@
 package com.hangha.postservice.domain.service;
 
-import com.hangha.postservice.domain.repository.PostStatusRepository;
 import com.hangha.postservice.controller.dto.PostStatusResponse;
 import com.hangha.postservice.domain.entity.Post;
 import com.hangha.postservice.domain.entity.PostStatus;
 import com.hangha.postservice.domain.repository.PostRepository;
+import com.hangha.postservice.domain.repository.PostStatusRepository;
+import com.hangha.postservice.exception.CustomException;
+import com.hangha.postservice.exception.ErrorCode;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,7 +20,6 @@ public class PostStatusService {
         this.postStatusRepository = postStatusRepository;
     }
 
-
     public void incrementLikes(Long postId) {
         PostStatus postStatus = getPostStatus(postId);
         postStatus.incrementLikesCount();
@@ -27,6 +28,9 @@ public class PostStatusService {
 
     public void decrementLikes(Long postId) {
         PostStatus postStatus = getPostStatus(postId);
+        if (postStatus.getLikesCount() <= 0) {
+            throw new CustomException(ErrorCode.INVALID_INPUT, "좋아요 수는 0보다 작을 수 없습니다.");
+        }
         postStatus.decrementLikesCount();
         postStatusRepository.save(postStatus);
     }
@@ -37,6 +41,9 @@ public class PostStatusService {
         if (isIncrement) {
             postStatus.incrementCommentsCount();
         } else {
+            if (postStatus.getCommentsCount() <= 0) {
+                throw new CustomException(ErrorCode.INVALID_INPUT, "댓글 수는 0보다 작을 수 없습니다.");
+            }
             postStatus.decrementCommentsCount();
         }
         postStatusRepository.save(postStatus);
@@ -49,7 +56,6 @@ public class PostStatusService {
         postStatusRepository.save(postStatus);
     }
 
-
     public PostStatusResponse getPostStatusSummary(Long postId) {
         PostStatus postStatus = getPostStatus(postId);
         return new PostStatusResponse(
@@ -61,12 +67,19 @@ public class PostStatusService {
 
     // 상태 가져오기
     private PostStatus getPostStatus(Long postId) {
+        validatePostId(postId);
+
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+
         return postStatusRepository.findByPost(post)
-                .orElseThrow(() -> new IllegalArgumentException("게시글 상태가 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_STATUS_NOT_FOUND));
     }
 
-
+    // postId 유효성 검증
+    private void validatePostId(Long postId) {
+        if (postId == null || postId <= 0) {
+            throw new CustomException(ErrorCode.INVALID_POST_ID);
+        }
+    }
 }
-

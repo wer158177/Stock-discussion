@@ -1,17 +1,12 @@
 server:
   port: 8000
 
-
-
-
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka}
-#      ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
-
 
 spring:
   application:
@@ -19,6 +14,22 @@ spring:
 
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            exposedHeaders:
+              - Set-Cookie
+              - Authorization
+            allowCredentials: true
+            maxAge: 3600
       routes:
         - id: user-service
           uri: lb://user-service
@@ -40,30 +51,10 @@ spring:
           filters:
             - StripPrefix=1
       default-filters:
-        - name: GlobalFilter
+        - name: JwtAuthFilter
           args:
-            baseMessage: "Spring Cloud Gateway Global Filter"
             preLogger: true
             postLogger: true
-        - name: JwtFilter
-
-
-
-      globalcors:
-        cors-configurations:
-          '[/**]': # ?? ??? ?? CORS ??
-            allowedOrigins:
-              - "http://localhost:3000" # React ?????
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders:
-              - "*" # ?? ?? ??
-            allowCredentials: true # ?? ??
-
 
 jwt:
   secret:

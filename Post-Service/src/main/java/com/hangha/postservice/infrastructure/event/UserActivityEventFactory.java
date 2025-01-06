@@ -1,4 +1,4 @@
-package com.hangha.postservice.event;
+package com.hangha.postservice.infrastructure.event;
 
 import com.hangha.common.event.model.UserActivityEvent;
 import com.hangha.postservice.controller.dto.PostRequestDto;

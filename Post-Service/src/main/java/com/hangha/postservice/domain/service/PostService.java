@@ -2,23 +2,33 @@ package com.hangha.postservice.domain.service;
 
 import com.hangha.postservice.application.command.PostUpdateCommand;
 import com.hangha.postservice.application.command.PostWriteCommand;
+import com.hangha.postservice.controller.dto.PageResponseDto;
 import com.hangha.postservice.controller.dto.PostResponseDto;
+import com.hangha.postservice.domain.entity.PostStatus;
 import com.hangha.postservice.domain.repository.PostRepository;
 import com.hangha.postservice.domain.entity.Post;
-import org.springframework.data.domain.PageRequest;
+import com.hangha.postservice.exception.CustomException;
+import com.hangha.postservice.exception.ErrorCode;
+
+import com.hangha.postservice.infrastructure.client.UserInfoService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class PostService implements PostInterface {
 
     private final PostRepository postRepository;
+    private final UserInfoService userInfoService;
 
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, UserInfoService userInfoService) {
         this.postRepository = postRepository;
+        this.userInfoService = userInfoService;
     }
 
     @Override
@@ -60,12 +70,13 @@ public class PostService implements PostInterface {
     // 공통 게시글 조회 및 작성자 검증 메서드
     private Post findPostByIdAndValidateUser(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND)); // 게시글을 찾을 수 없는 경우
         if (!post.getUserId().equals(userId)) {
-            throw new RuntimeException("자신이 작성한 게시글만 수정할 수 있습니다.");
+            throw new CustomException(ErrorCode.INVALID_INPUT, "자신이 작성한 게시글만 수정 또는 삭제할 수 있습니다."); // 작성자 검증 실패
         }
         return post;
     }
+
 
 
 
@@ -74,23 +85,23 @@ public class PostService implements PostInterface {
     }
 
 
-    public List<PostResponseDto> getPosts(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return postRepository.findAll(pageable)
-                .stream()
-                .map(post -> new PostResponseDto(post.getId(), post.getTitle(), post.getContent()))
-                .collect(Collectors.toList());
+
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Post> findAllPosts(Pageable pageable) {
+        return postRepository.findAll(pageable);
     }
 
-
-
-    // 랜덤 게시글 조회
-    public List<PostResponseDto> getRandomPosts(int size) {
-        return postRepository.findRandomPostsOptimized(size)
-                .stream()
-                .map(post -> new PostResponseDto(post.getId(), post.getTitle(), post.getContent()))
-                .collect(Collectors.toList());
-    }
 
 
 }
+
+
+
+
+
+
+
+

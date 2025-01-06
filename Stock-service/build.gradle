@@ -30,8 +30,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.postgresql:postgresql'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    //lombok
-    annotationProcessor 'org.projectlombok:lombok'
+
+    implementation 'com.auth0:java-jwt:3.18.1'
+
+
+    // Jackson Databind
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations' // Jackson 애노테이션 지원
+    implementation 'com.fasterxml.jackson.core:jackson-core' // Jackson Core
+
+    // Spring Boot Scheduler
+    implementation 'org.springframework.boot:spring-boot-starter'
 
     // JUnit 5
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'

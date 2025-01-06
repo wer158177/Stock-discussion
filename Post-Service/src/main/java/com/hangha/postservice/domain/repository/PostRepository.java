@@ -17,6 +17,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Long> findRandomPostsExcluding(@Param("excludedPostIds") List<Long> excludedPostIds, Pageable pageable);
 
 
-    @Query(value = "SELECT * FROM post WHERE id >= FLOOR(RAND() * (SELECT MAX(id) FROM post)) LIMIT :size", nativeQuery = true)
-    List<Post> findRandomPostsOptimized(@Param("size") int size);
+    @Query("SELECT p FROM Post p")
+    Page<Post> findAllPosts(Pageable pageable);
+
 }

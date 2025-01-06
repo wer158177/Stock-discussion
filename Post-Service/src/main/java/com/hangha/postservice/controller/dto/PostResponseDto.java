@@ -1,18 +1,22 @@
 package com.hangha.postservice.controller.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
-@NoArgsConstructor
-public class PostResponseDto {
-    private Long id;
-    private String title;
-    private String content;
+import java.time.LocalDateTime;
+import java.util.List;
 
-    public PostResponseDto(Long id, String title, String content) {
-        this.id = id;
-        this.title = title;
-        this.content = content;
-    }
+@Data
+@AllArgsConstructor
+public class PostResponseDto {
+    private String id;
+    private String username;
+    private String userImage;
+    private String content;
+    private String image;
+    private int likes;
+    private LocalDateTime timestamp;
+    private List<String> hashtags;
 }

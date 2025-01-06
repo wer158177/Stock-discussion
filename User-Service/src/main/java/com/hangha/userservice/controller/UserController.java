@@ -27,20 +27,7 @@ public class UserController {
         this.userinfoService = userinfoService;
     }
 
-    @PostMapping(value = "/register", consumes = {"multipart/form-data"})
-    public ResponseEntity<String> registerUser(
-            @ModelAttribute UserRequest requestDto) {
-        // 회원가입 서비스 호출 (중복 체크 및 파일 업로드 처리 포함)
-        userApplicationService.registerUser(requestDto, requestDto.getImageFile());
-        return ResponseEntity.ok("회원가입 성공!");
-    }
 
-
-    @GetMapping("/verify")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-        emailVerificationService.verifyEmail(token);
-        return ResponseEntity.ok("이메일 인증 성공!");
-    }
 
 
 

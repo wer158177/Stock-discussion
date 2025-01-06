@@ -29,7 +29,7 @@ public class UserClientTest {
     @BeforeEach
     void setUp() {
         userId = 1L;  // 테스트용 userId 설정
-        mockResponse = new UserResponseDto(userId, "testUser"); // mockResponse 객체 초기화
+        mockResponse = new UserResponseDto(userId, "testUser",null); // mockResponse 객체 초기화
     }
 
     @Test

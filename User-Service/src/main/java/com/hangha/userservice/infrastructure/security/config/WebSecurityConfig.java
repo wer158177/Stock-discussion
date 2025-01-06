@@ -1,12 +1,11 @@
 package com.hangha.userservice.infrastructure.security.config;
 
-import com.hangha.common.JwtUtil;
+import com.hangha.common.jwt.JwtUtil;
 import com.hangha.userservice.infrastructure.security.filter.ExceptionHandlerFilter;
 import com.hangha.userservice.infrastructure.security.filter.JwtAuthenticationFilter;
 import com.hangha.userservice.infrastructure.security.filter.JwtVerificationFilter;
 import com.hangha.userservice.infrastructure.security.service.RefreshTokenService;
 import com.hangha.userservice.infrastructure.security.service.UserDetailsServiceImpl;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +14,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -73,10 +71,9 @@ public class WebSecurityConfig {
         log.info("SecurityFilterChain 설정 시작");
 
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/**", "/api/user/refresh").permitAll()
-                        .requestMatchers("/api/following/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -88,8 +85,8 @@ public class WebSecurityConfig {
                     configuration.setAllowCredentials(true);
                     return configuration;
                 }))
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable);
+                .httpBasic(httpBasic -> httpBasic.disable())
+                .formLogin(formLogin -> formLogin.disable());
 
         http.addFilterBefore(jwtVerificationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.addFilterAt(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

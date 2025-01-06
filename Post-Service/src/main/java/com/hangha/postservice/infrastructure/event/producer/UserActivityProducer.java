@@ -1,4 +1,4 @@
-package com.hangha.postservice.event.producer;
+package com.hangha.postservice.infrastructure.event.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hangha.common.event.model.UserActivityEvent;

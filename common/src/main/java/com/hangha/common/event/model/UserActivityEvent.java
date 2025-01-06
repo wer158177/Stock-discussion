@@ -15,6 +15,7 @@ public class UserActivityEvent {
     @JsonProperty("userId")
     private Long userId;
 
+
     @JsonProperty("activityType")
     private String activityType;
 

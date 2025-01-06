@@ -1,18 +1,27 @@
 package com.hangha.postservice.application;
 
+import com.hangha.common.dto.UserResponseDto;
 import com.hangha.common.event.model.UserActivityEvent;
 import com.hangha.postservice.application.command.PostUpdateCommand;
 import com.hangha.postservice.application.command.PostWriteCommand;
+import com.hangha.postservice.controller.dto.PageResponseDto;
 import com.hangha.postservice.controller.dto.PostRequestDto;
+import com.hangha.postservice.controller.dto.PostResponseDto;
 import com.hangha.postservice.controller.dto.PostStatusResponse;
-import com.hangha.postservice.domain.service.PostInterface;
-import com.hangha.postservice.domain.service.PostLikesService;
-import com.hangha.postservice.domain.service.PostStatusService;
-import com.hangha.postservice.domain.service.TagService;
-import com.hangha.postservice.event.UserActivityEventFactory;
-import com.hangha.postservice.event.producer.UserActivityProducer;
+import com.hangha.postservice.domain.entity.Post;
+import com.hangha.postservice.domain.service.*;
+
+import com.hangha.postservice.infrastructure.client.UserInfoService;
+import com.hangha.postservice.infrastructure.event.UserActivityEventFactory;
+import com.hangha.postservice.infrastructure.event.producer.UserActivityProducer;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PostApplicationService {
@@ -21,14 +30,18 @@ public class PostApplicationService {
     private final PostLikesService postLikesService;
     private final TagService tagService;
     private final UserActivityProducer producer;
+    private final UserInfoService userInfoService;
+    private final PostService postService;
 
 
-    public PostApplicationService(PostInterface postinterface, PostStatusService postStatusService, PostLikesService postLikesService, TagService tagService, UserActivityProducer producer) {
+    public PostApplicationService(PostInterface postinterface, PostStatusService postStatusService, PostLikesService postLikesService, TagService tagService, UserActivityProducer producer, UserInfoService userInfoService, PostService postService) {
         this.postinterface = postinterface;
         this.postStatusService = postStatusService;
         this.postLikesService = postLikesService;
         this.tagService = tagService;
         this.producer = producer;
+        this.userInfoService = userInfoService;
+        this.postService = postService;
     }
 
 
@@ -77,6 +90,30 @@ public class PostApplicationService {
         postStatusService.decrementLikes(postId);
         UserActivityEvent envet = UserActivityEventFactory.createUnlikeEvent(userId,postId);
         producer.sendActivityEvent(envet);
+    }
+
+    public PageResponseDto<PostResponseDto> getPosts(Pageable pageable) {
+        Page<Post> posts = postService.findAllPosts(pageable);
+
+        List<PostResponseDto> dtos = posts.getContent().stream()
+                .map(post -> {
+                    UserResponseDto userInfo = userInfoService.getUserInfo(post.getUserId());
+                    List<String> tags = tagService.getTagsForPost(post.getId());
+
+                    return new PostResponseDto(
+                            post.getId().toString(),
+                            userInfo.getUsername(),
+                            userInfo.getImageUrl(),
+                            post.getContent(),
+                            null,
+                            post.getPostStatus().getLikesCount(),
+                            post.getCreatedAt(),
+                            tags
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new PageResponseDto<>(new PageImpl<>(dtos, pageable, posts.getTotalElements()));
     }
 
 

@@ -6,8 +6,6 @@ import com.hangha.commentservice.application.CommentsApplicationService;
 import com.hangha.commentservice.controller.dto.CommentsRequestDto;
 import com.hangha.commentservice.controller.dto.SimpleCommentResponseDto;
 import com.hangha.commentservice.domain.service.CommentService;
-import com.hangha.common.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -20,7 +20,7 @@ public class UserinfoService {
     public UserResponseDto getUserInfo(Long userId){
       User user = userRepository.findById(userId)
               .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
-        return new UserResponseDto(user.getId(),user.getUsername());
+        return new UserResponseDto(user.getId(),user.getUsername(),user.getImageUrl());
 
 
     }

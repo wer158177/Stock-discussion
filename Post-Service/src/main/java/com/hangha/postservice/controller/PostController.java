@@ -1,8 +1,9 @@
 package com.hangha.postservice.controller;
 
 
-import com.hangha.common.JwtUtil;
+import com.hangha.common.jwt.JwtUtil;
 import com.hangha.postservice.application.PostApplicationService;
+import com.hangha.postservice.controller.dto.PageResponseDto;
 import com.hangha.postservice.controller.dto.PostRequestDto;
 import com.hangha.postservice.controller.dto.PostResponseDto;
 import com.hangha.postservice.controller.dto.PostStatusResponse;
@@ -10,12 +11,11 @@ import com.hangha.postservice.domain.service.PostService;
 import com.hangha.postservice.domain.service.PostStatusService;
 
 
-import jakarta.servlet.http.HttpServletRequest;
-
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/post")
@@ -25,10 +25,10 @@ public class PostController {
     private final PostStatusService postStatusService;
     private final PostService postService;
 
-    public PostController(JwtUtil jwtUtil, PostApplicationService postApplicationService, PostStatusService postStatusService, PostStatusService postStatusService1, PostService postService) {
+    public PostController(JwtUtil jwtUtil, PostApplicationService postApplicationService, PostStatusService postStatusService, PostService postService) {
         this.jwtUtil = jwtUtil;
         this.postApplicationService = postApplicationService;
-        this.postStatusService = postStatusService1;
+        this.postStatusService = postStatusService;
         this.postService = postService;
     }
 
@@ -60,13 +60,13 @@ public class PostController {
 
 
     @PostMapping("/{postId}/like")
-    public ResponseEntity<Void> likePost( @RequestHeader("X-Claim-userId") Long userId, @RequestParam Long postId) {
+    public ResponseEntity<Void> likePost( @RequestHeader("X-Claim-userId") Long userId, @PathVariable Long postId) {
         postApplicationService.likePost(postId, userId);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{postId}/like")
-    public ResponseEntity<Void> unlikePost( @RequestHeader("X-Claim-userId") Long userId, @RequestParam Long postId) {
+    public ResponseEntity<Void> unlikePost( @RequestHeader("X-Claim-userId") Long userId, @PathVariable Long postId) {
         postApplicationService.unlikePost(postId, userId);
         return ResponseEntity.ok().build();
     }
@@ -101,21 +101,18 @@ public class PostController {
 
 
 
-    //필요없어질수도있음
-    @GetMapping()
-    public ResponseEntity<List<PostResponseDto>> getPosts(
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size) {
-        List<PostResponseDto> posts = postService.getPosts(page, size);
-        return ResponseEntity.ok(posts);
-    }
 
 
-    // 랜덤 게시글 조회 API
-    @GetMapping("/random")
-    public List<PostResponseDto> getRandomPosts(@RequestParam(defaultValue = "10") int size) {
-        return postService.getRandomPosts(size);
+
+    @GetMapping
+    public ResponseEntity<PageResponseDto<PostResponseDto>> getPosts(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+
+        PageResponseDto<PostResponseDto> response = postApplicationService.getPosts(pageable);
+        return ResponseEntity.ok(response);
     }
+
 
 
 }
