@@ -31,6 +31,12 @@ spring:
             allowCredentials: true
             maxAge: 3600
       routes:
+        - id: stock-websocket
+          uri: lb:ws://stock-service
+          predicates:
+            - Path=/ws/upbit/**
+          filters:
+            - RemoveRequestHeader=Origin
         - id: user-service
           uri: lb://user-service
           predicates:

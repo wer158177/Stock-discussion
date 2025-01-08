@@ -136,8 +136,9 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
         List<String> publicPaths = Arrays.asList(
                 "/api/auth/login",
                 "/api/user/register",
-                "/api/user/refresh"
-
+                "/api/user/refresh",
+                "/stock-service/ws/ticker",
+                "/stock-service/ws/minute"
         );
 
         boolean isPublic = publicPaths.stream().anyMatch(path::contains);

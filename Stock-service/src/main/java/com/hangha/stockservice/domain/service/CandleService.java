@@ -6,7 +6,7 @@ import com.hangha.stockservice.controller.dto.CandleResponseDto;
 import com.hangha.stockservice.domain.entity.Candle;
 import com.hangha.stockservice.domain.entity.Stock;
 import com.hangha.stockservice.domain.repository.CandleRepository;
-import com.hangha.stockservice.infrastructure.UpbitService;
+import com.hangha.stockservice.infrastructure.service.UpbitService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

@@ -1,8 +1,9 @@
-package com.hangha.stockservice.infrastructure;
+package com.hangha.stockservice.infrastructure.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class UpbitService {
 
@@ -79,18 +81,76 @@ public class UpbitService {
         }
     }
 
+
+    private void logDecodedJwt(String jwtToken) {
+        DecodedJWT decodedJWT = JWT.decode(jwtToken);
+        System.out.printf("Decoded JWT Payload: %s%n", decodedJWT.getPayload());
+    }
+
+
+    public String getMinuteCandles(String market, String unit, String to, int count) {
+        try {
+            StringBuilder urlBuilder = new StringBuilder()
+                    .append("https://api.upbit.com/v1/candles/minutes/")
+                    .append(unit)
+                    .append("?market=")
+                    .append(market)
+                    .append("&count=")
+                    .append(count);
+
+            StringBuilder queryStringBuilder = new StringBuilder()
+                    .append("market=")
+                    .append(market)
+                    .append("&count=")
+                    .append(count);
+
+            // to 파라미터가 있는 경우에만 추가
+            if (to != null && !to.isEmpty()) {
+                urlBuilder.append("&to=").append(to);
+                queryStringBuilder.append("&to=").append(to);
+            }
+
+            String url = urlBuilder.toString();
+            String queryString = queryStringBuilder.toString();
+
+            log.debug("Request URL: {}", url);
+            log.debug("Query String: {}", queryString);
+
+            String queryHash = hashQueryString(queryString);
+            String jwtToken = createJwtToken(queryHash);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", "Bearer " + jwtToken);
+            headers.add("Accept", "application/json");
+
+            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    org.springframework.http.HttpMethod.GET,
+                    requestEntity,
+                    String.class
+            );
+
+            log.debug("Response Status: {}", response.getStatusCode());
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("분봉 데이터 조회 실패: {}", e.getMessage());
+            throw new RuntimeException("Failed to fetch minute candle data from Upbit API", e);
+        }
+    }
+
+
     private String createJwtToken(String queryHash) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secretKey);
             return JWT.create()
                     .withClaim("access_key", accessKey)
-                    .withClaim("nonce", UUID.randomUUID().toString()) // UUID로 nonce 생성
-                    .withClaim("query_hash", queryHash) // Query 해시 추가
-                    .withClaim("query_hash_alg", "SHA512") // 알고리즘 정보 추가
-                    .sign(algorithm); // 서명
+                    .withClaim("nonce", UUID.randomUUID().toString())
+                    .withClaim("query_hash", queryHash)
+                    .withClaim("query_hash_alg", "SHA512")
+                    .sign(algorithm);
         } catch (Exception e) {
-            System.err.printf("Error generating JWT: %s%n", e.getMessage());
-            throw new RuntimeException("Failed to generate JWT", e);
+            throw new RuntimeException("JWT 토큰 생성 실패", e);
         }
     }
 
@@ -100,22 +160,17 @@ public class UpbitService {
             byte[] hash = digest.digest(queryString.getBytes(StandardCharsets.UTF_8));
             return bytesToHex(hash);
         } catch (Exception e) {
-            System.err.printf("Error hashing query string: %s%n", e.getMessage());
-            throw new RuntimeException("Failed to hash query string", e);
+            throw new RuntimeException("Query string 해싱 실패", e);
         }
     }
 
     private String bytesToHex(byte[] bytes) {
         StringBuilder hexString = new StringBuilder();
         for (byte b : bytes) {
-            hexString.append(String.format("%02x", b));
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) hexString.append('0');
+            hexString.append(hex);
         }
         return hexString.toString();
-    }
-
-
-    private void logDecodedJwt(String jwtToken) {
-        DecodedJWT decodedJWT = JWT.decode(jwtToken);
-        System.out.printf("Decoded JWT Payload: %s%n", decodedJWT.getPayload());
     }
 }
