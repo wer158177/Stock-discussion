@@ -45,6 +45,12 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RefreshToken> refreshTokens;
 
+    @Column(columnDefinition = "bigint default 0")
+    private Long followerCount = 0L;
+
+    @Column(columnDefinition = "bigint default 0")
+    private Long followingCount = 0L;
+
 
     @Column(nullable = false)
     private boolean isVerified = false; // 인증 상태
@@ -107,5 +113,24 @@ public class User {
         this.email = email;
         this.isVerified = isVerified;
     }
+
+
+    public void incrementFollowerCount() {
+        this.followerCount++;
+    }
+
+    public void decrementFollowerCount() {
+        this.followerCount = Math.max(0, this.followerCount - 1);
+    }
+
+    public void incrementFollowingCount() {
+        this.followingCount++;
+    }
+
+    public void decrementFollowingCount() {
+        this.followingCount = Math.max(0, this.followingCount - 1);
+    }
+
+
 
 }

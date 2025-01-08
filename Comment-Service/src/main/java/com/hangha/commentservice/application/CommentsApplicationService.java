@@ -9,24 +9,33 @@ import com.hangha.commentservice.controller.dto.CommentsRequestDto;
 import com.hangha.commentservice.controller.dto.SimpleCommentResponseDto;
 import com.hangha.commentservice.domain.entity.PostComments;
 import com.hangha.commentservice.domain.service.CommentLikesService;
+import com.hangha.commentservice.domain.service.CommentQueryService;
 import com.hangha.commentservice.domain.service.CommentService;
 import com.hangha.commentservice.event.UserActivityEventFactory;
 import com.hangha.commentservice.event.UserActivityProducer;
+import com.hangha.commentservice.feignclient.UserFeignClient;
+import com.hangha.common.dto.UserResponseDto;
 import com.hangha.common.event.model.UserActivityEvent;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentsApplicationService {
     private final CommentService commentService;
     private final UserActivityProducer userActivityProducer;
+    private final CommentQueryService commentQueryService;
+
 
     private final CommentLikesService commentLikesService;
-    public CommentsApplicationService(CommentService commentService, UserActivityProducer userActivityProducer, CommentLikesService commentLikesService) {
+    public CommentsApplicationService(CommentService commentService, UserActivityProducer userActivityProducer, CommentQueryService commentQueryService, CommentLikesService commentLikesService) {
         this.commentService = commentService;
         this.userActivityProducer = userActivityProducer;
+        this.commentQueryService = commentQueryService;
+
         this.commentLikesService = commentLikesService;
     }
 
@@ -97,31 +106,14 @@ public class CommentsApplicationService {
 
 
 
-    //댓글조회
-    public List<SimpleCommentResponseDto> getParentComments(Long postId) {
-        // 도메인 객체를 DTO로 변환
-        return commentService.findParentCommentsByPostId(postId)
-                .stream()
-                .map(this::toSimpleCommentResponseDto)
-                .toList();
-    }
-    //대댓글조회
-    public List<SimpleCommentResponseDto> getReplies(Long parentId) {
-        // 도메인 객체를 DTO로 변환
-        return commentService.findRepliesByParentId(parentId)
-                .stream()
-                .map(this::toSimpleCommentResponseDto)
-                .toList();
+    @Transactional
+    public List<SimpleCommentResponseDto> getParentComments(Long postId, Long userId) {
+        return commentQueryService.getParentComments(postId, userId);
     }
 
-    //댓글조회 dto 반환메소드
-    private SimpleCommentResponseDto toSimpleCommentResponseDto(PostComments comment) {
-        return new SimpleCommentResponseDto(
-                comment.getId(),
-                comment.getContent(),
-                comment.getUserId(),
-                comment.getCreatedAt()
-        );
+    @Transactional
+    public List<SimpleCommentResponseDto> getReplies(Long parentId, Long userId) {
+        return commentQueryService.getReplies(parentId, userId);
     }
 
 

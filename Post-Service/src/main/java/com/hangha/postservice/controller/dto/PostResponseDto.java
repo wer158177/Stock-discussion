@@ -19,4 +19,5 @@ public class PostResponseDto {
     private int likes;
     private LocalDateTime timestamp;
     private List<String> hashtags;
+    private boolean isLiked;
 }

@@ -3,6 +3,7 @@ package com.hangha.userservice.controller;
 import com.hangha.common.dto.UserResponseDto;
 import com.hangha.userservice.application.UserApplicationService;
 
+import com.hangha.userservice.controller.dto.FollowUserinfo;
 import com.hangha.userservice.controller.dto.UpdateProfileRequest;
 import com.hangha.userservice.controller.dto.UserRequest;
 
@@ -26,8 +27,6 @@ public class UserController {
         this.emailVerificationService = emailVerificationService;
         this.userinfoService = userinfoService;
     }
-
-
 
 
 
@@ -59,7 +58,14 @@ public class UserController {
     }
 
 
-
+    //팔로우를 위한 유저인포
+    @GetMapping("/info/{username}")
+    public ResponseEntity<FollowUserinfo> followUserinfo(
+            @PathVariable String username,
+            @RequestHeader("X-Claim-userId") Long userId) {
+        FollowUserinfo userinfo = userinfoService.getFollowUserInfo(username, userId);
+        return ResponseEntity.ok(userinfo);
+    }
 
 
 }

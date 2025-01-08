@@ -18,7 +18,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/alarms")
+@RequestMapping("/api/alarms")
 public class AlarmController {
 
     private final AlarmReadService alarmReadService;
@@ -50,8 +50,8 @@ public class AlarmController {
     }
 
 
-    @GetMapping(value = "/alarms/stream/{userId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<AlarmDto> getRealTimeAlarms(@PathVariable Long userId) {
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<AlarmDto> getRealTimeAlarms(@RequestHeader("X-Claim-userId") Long userId) {
         return alarmService.sendRealTimeAlarms(userId)
                 .doOnTerminate(() -> log.info("SSE stream terminated for userId: {}", userId));  // 스트리밍 종료 시 로그 출력
     }

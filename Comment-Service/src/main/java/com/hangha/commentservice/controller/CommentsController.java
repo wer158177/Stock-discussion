@@ -35,15 +35,18 @@ public class CommentsController {
     }
 
     @GetMapping("/{postId}/comments")
-    public ResponseEntity<List<SimpleCommentResponseDto>> getParentComments(@PathVariable Long postId) {
-        List<SimpleCommentResponseDto> parentComments = commentsApplicationService.getParentComments(postId);
+    public ResponseEntity<List<SimpleCommentResponseDto>> getParentComments(
+            @PathVariable Long postId,
+            @RequestHeader("X-Claim-userId") Long userId) {
+        List<SimpleCommentResponseDto> parentComments = commentsApplicationService.getParentComments(postId, userId);
         return ResponseEntity.ok(parentComments);
     }
 
-
     @GetMapping("/{postId}/comments/{parentId}/replies")
-    public ResponseEntity<List<SimpleCommentResponseDto>> getReplies(@PathVariable Long parentId) {
-        List<SimpleCommentResponseDto> replies = commentsApplicationService.getReplies(parentId);
+    public ResponseEntity<List<SimpleCommentResponseDto>> getReplies(
+            @PathVariable Long parentId,
+            @RequestHeader("X-Claim-userId") Long userId) {
+        List<SimpleCommentResponseDto> replies = commentsApplicationService.getReplies(parentId, userId);
         return ResponseEntity.ok(replies);
     }
 
@@ -83,6 +86,7 @@ public class CommentsController {
         commentsApplicationService.unlikeComment(commentId, userId,postId);
         return ResponseEntity.ok().build();
     }
+
 
     @GetMapping("/post/{postId}/exists")
     public boolean checkPostExists(@PathVariable Long postId) {

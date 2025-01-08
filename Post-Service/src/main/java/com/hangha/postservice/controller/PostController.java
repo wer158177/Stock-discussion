@@ -104,12 +104,13 @@ public class PostController {
 
 
 
-    @GetMapping
+    @GetMapping("/random")
     public ResponseEntity<PageResponseDto<PostResponseDto>> getPosts(
+            @RequestHeader("X-Claim-userId") Long userId,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
 
-        PageResponseDto<PostResponseDto> response = postApplicationService.getPosts(pageable);
+        PageResponseDto<PostResponseDto> response = postApplicationService.getPosts(pageable,userId);
         return ResponseEntity.ok(response);
     }
 

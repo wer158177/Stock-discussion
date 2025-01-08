@@ -1,24 +1,22 @@
 package com.hangha.userservice.domain.Service;
 
 import com.hangha.userservice.domain.entity.Following;
-
+import com.hangha.userservice.domain.entity.User;
 import com.hangha.userservice.domain.repository.FollowingRepository;
 import com.hangha.userservice.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.data.domain.Page;
+import jakarta.ws.rs.NotFoundException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class FollowingService {
-
     private final FollowingRepository followingRepository;
-
     private final UserRepository userRepository;
 
     public FollowingService(FollowingRepository followingRepository, UserRepository userRepository) {
@@ -26,46 +24,61 @@ public class FollowingService {
         this.userRepository = userRepository;
     }
 
-    @Transactional
     public void follow(Long followerId, Long followingId) {
-        // 자신을 팔로우하는 것을 방지
+        // 자기 자신을 팔로우하는지 검사
         if (followerId.equals(followingId)) {
-            throw new IllegalArgumentException("자신을 팔로우할 수 없습니다.");
+            throw new IllegalArgumentException("자기 자신을 팔로우할 수 없습니다.");
         }
 
         validateUsersExist(followerId, followingId);
 
-        if (followingRepository.existsByFollowerIdAndFollowingId(followerId, followingId)) {
-            throw new IllegalArgumentException("이미 팔로우한 사용자입니다.");
+        if (isAlreadyFollowing(followerId, followingId)) {
+            throw new IllegalStateException("이미 팔로우하고 있습니다.");
         }
 
         Following following = new Following(followerId, followingId);
         followingRepository.save(following);
+        updateFollowCount(followerId, followingId, true);
+    }
+
+    public void unfollow(Long followerId, Long followingId) {
+        validateUsersExist(followerId, followingId);
+
+        Following following = followingRepository.findByFollowerIdAndFollowingId(followerId, followingId)
+                .orElseThrow(() -> new NotFoundException("팔로우 관계가 존재하지 않습니다."));
+
+        followingRepository.delete(following);
+        updateFollowCount(followerId, followingId, false);
     }
 
     @Transactional
-    public void unfollow(Long followerId, Long followingId) {
-        // 자신을 팔로우 취소하는 것을 방지
-        if (followerId.equals(followingId)) {
-            throw new IllegalArgumentException("자신의 팔로우를 취소할 수 없습니다.");
-        }
-
-        validateUsersExist(followerId, followingId);
-        followingRepository.deleteByFollowerIdAndFollowingId(followerId, followingId);
-    }
-
-    // 커서 기반 페이징으로 팔로워 목록 가져오기
-    public List<Long> getFollowers(Long userId, Long cursor, int size) {
-        // 커서 기반 페이징 처리
-        Pageable pageable = PageRequest.of(0, size);  // 커서 기반으로 데이터를 가져오므로 페이지는 0으로 고정
-        return followingRepository.findFollowersByFollowingId(userId, cursor, pageable); // 커서 기준으로 팔로워 조회
-    }
-
     public List<Long> getFollowing(Long userId) {
         validateUserExists(userId);
-        return followingRepository.findAllByFollowingId(userId).stream()
+        return followingRepository.findAllByFollowerId(userId).stream()
                 .map(Following::getFollowingId)
-                .toList();
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<Long> getFollowers(Long userId, Long cursor, int size) {
+        validateUserExists(userId);
+        Pageable pageable = PageRequest.of(0, size);
+        return followingRepository.findFollowersByFollowingId(userId, cursor, pageable);
+    }
+
+    private void updateFollowCount(Long followerId, Long followingId, boolean isFollow) {
+        User follower = userRepository.findById(followerId)
+                .orElseThrow(() -> new NotFoundException("팔로워를 찾을 수 없습니다."));
+        User following = userRepository.findById(followingId)
+                .orElseThrow(() -> new NotFoundException("팔로잉 대상을 찾을 수 없습니다."));
+
+        if (isFollow) {
+            follower.incrementFollowingCount();
+            following.incrementFollowerCount();
+        } else {
+            follower.decrementFollowingCount();
+            following.decrementFollowerCount();
+        }
     }
 
     private void validateUsersExist(Long... userIds) {
@@ -79,5 +92,8 @@ public class FollowingService {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId);
         }
     }
-}
 
+    private boolean isAlreadyFollowing(Long followerId, Long followingId) {
+        return followingRepository.existsByFollowerIdAndFollowingId(followerId, followingId);
+    }
+}

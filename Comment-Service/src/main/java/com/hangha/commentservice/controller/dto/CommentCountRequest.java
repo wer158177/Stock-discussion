@@ -1,4 +1,4 @@
-package com.hangha.commentservice.domain.service;
+package com.hangha.commentservice.controller.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

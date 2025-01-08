@@ -46,4 +46,10 @@ public class PostLikesService {
         return postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
     }
+
+
+    public boolean isLikedByUser(Long postId, Long userId) {
+        Post post = findPostById(postId);
+        return postLikesRepository.existsByPostAndUserId(post, userId);
+    }
 }

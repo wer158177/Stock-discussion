@@ -38,37 +38,12 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequestDto loginRequest, HttpServletResponse response) {
+    public ResponseEntity<String> login(@RequestBody LoginRequestDto loginRequest) {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
 
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        User user = userDetails.getUser();
-
-        String accessToken = jwtUtil.createToken(
-                user.getId(),
-                user.getEmail(),
-                user.getUsername(),
-                user.getUserRole().name(),
-                true
-        );
-
-        String refreshToken = jwtUtil.createToken(
-                user.getId(),
-                user.getEmail(),
-                user.getUsername(),
-                user.getUserRole().name(),
-                false
-        );
-
-        addCookie(response, JwtUtil.ACCESS_TOKEN, accessToken);
-        addCookie(response, JwtUtil.REFRESH_TOKEN, refreshToken);
-
-        refreshTokenService.saveRefreshToken(user.getId(), refreshToken,
-                new Date(System.currentTimeMillis() + JwtUtil.REFRESH_TOKEN_EXPIRE_TIME));
 
         return ResponseEntity.ok("로그인 성공");
     }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FollowingRepository extends JpaRepository<Following, Long> {
@@ -21,5 +22,12 @@ public interface FollowingRepository extends JpaRepository<Following, Long> {
 
     List<Following> findAllByFollowingId(Long followingId);
     void deleteByFollowerIdAndFollowingId(Long followerId, Long followingId);
+
+    Optional<Following> findByFollowerIdAndFollowingId(Long followerId, Long followingId);
+
+
+    List<Following> findAllByFollowerId(Long followerId);
+
+
 
 }

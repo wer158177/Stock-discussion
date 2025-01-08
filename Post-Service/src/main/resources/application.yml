@@ -21,7 +21,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop  # JPA Hibernate 자동 DDL 생성 옵션
+      ddl-auto: update # JPA Hibernate 자동 DDL 생성 옵션
     show-sql: true  # SQL 쿼리 로그 출력 여부
     properties:
       hibernate:

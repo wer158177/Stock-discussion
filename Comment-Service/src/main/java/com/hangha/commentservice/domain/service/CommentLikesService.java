@@ -7,6 +7,11 @@ import com.hangha.commentservice.domain.entity.PostComments;
 import com.hangha.commentservice.domain.repository.CommentLikesRepository;
 import com.hangha.commentservice.domain.repository.CommentsRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class CommentLikesService {
@@ -54,4 +59,11 @@ public class CommentLikesService {
                 comment.getParentId() !=null
         );
     }
+
+
+    @Transactional(readOnly = true)
+    public Set<Long> getLikedCommentIds(Long userId, List<Long> commentIds) {
+        return new HashSet<>(commentLikesRepository.findLikedCommentIds(userId, commentIds));
+    }
+
 }

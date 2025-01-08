@@ -50,6 +50,18 @@ spring:
             - Path=/comment-service/**
           filters:
             - StripPrefix=1
+        - id: activity-service
+          uri: lb://activity-service
+          predicates:
+            - Path=/activity-service/**
+          filters:
+            - StripPrefix=1
+        - id: stock-service
+          uri: lb://stock-service
+          predicates:
+            - Path=/stock-service/**
+          filters:
+            - StripPrefix=1
       default-filters:
         - name: JwtAuthFilter
           args:

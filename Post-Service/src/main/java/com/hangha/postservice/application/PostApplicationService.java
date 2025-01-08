@@ -92,13 +92,14 @@ public class PostApplicationService {
         producer.sendActivityEvent(envet);
     }
 
-    public PageResponseDto<PostResponseDto> getPosts(Pageable pageable) {
+    public PageResponseDto<PostResponseDto> getPosts(Pageable pageable,Long userId) {
         Page<Post> posts = postService.findAllPosts(pageable);
 
         List<PostResponseDto> dtos = posts.getContent().stream()
                 .map(post -> {
                     UserResponseDto userInfo = userInfoService.getUserInfo(post.getUserId());
                     List<String> tags = tagService.getTagsForPost(post.getId());
+                    boolean isLiked = postLikesService.isLikedByUser(post.getId(), userId);
 
                     return new PostResponseDto(
                             post.getId().toString(),
@@ -108,7 +109,8 @@ public class PostApplicationService {
                             null,
                             post.getPostStatus().getLikesCount(),
                             post.getCreatedAt(),
-                            tags
+                            tags,
+                            isLiked
                     );
                 })
                 .collect(Collectors.toList());
