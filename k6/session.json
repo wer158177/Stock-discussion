@@ -1,0 +1,76 @@
+{
+  "dashboard": {
+    "panels": [
+      {
+        "type": "timeseries",
+        "title": "WebSocket Connecting Time",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "ws_connecting_time",
+            "legendFormat": "{{quantile}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "thresholds": {
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 500, "color": "orange" },
+                { "value": 1000, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "type": "gauge",
+        "title": "Active WebSocket Sessions",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "ws_sessions",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "none",
+            "thresholds": {
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 500, "color": "orange" },
+                { "value": 1000, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "type": "stat",
+        "title": "WebSocket Errors",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "ws_errors",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 10, "color": "orange" },
+                { "value": 50, "color": "red" }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

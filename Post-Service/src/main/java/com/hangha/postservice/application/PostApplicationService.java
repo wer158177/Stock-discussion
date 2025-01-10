@@ -88,7 +88,9 @@ public class PostApplicationService {
         // 도메인 서비스 호출
         postLikesService.removeLike(postId, userId);
         postStatusService.decrementLikes(postId);
+        //팩토리생성 dto 만들기
         UserActivityEvent envet = UserActivityEventFactory.createUnlikeEvent(userId,postId);
+        //만든작업을 보내줌
         producer.sendActivityEvent(envet);
     }
 

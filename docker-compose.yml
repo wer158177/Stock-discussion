@@ -61,8 +61,40 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
+  # InfluxDB 2.x
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      # InfluxDB 2.x 초기 설정 (v1 호환 DBRP 사용)
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=myuser
+      - DOCKER_INFLUXDB_INIT_PASSWORD=mypassword
+      - DOCKER_INFLUXDB_INIT_ORG=my-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=my-bucket
+      - INFLUXDB_HTTP_CORS_ENABLED=true
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+
+  # Grafana (3001번 포트로 노출)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"   # Host의 3001 → 컨테이너 내부 3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - influxdb
 
 volumes:
   db_data:
   postgres_data:
   redis_data:
+  influxdb_data:
+  grafana_data:

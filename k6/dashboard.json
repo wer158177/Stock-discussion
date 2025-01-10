@@ -1,0 +1,36 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": null,
+    "title": "Automated Real-Time Monitoring",
+    "timezone": "browser",
+    "schemaVersion": 36,
+    "version": 1,
+    "refresh": "5s",
+    "panels": [
+      {
+        "type": "timeseries",
+        "title": "HTTP Requests",
+        "datasource": "InfluxDB",
+        "targets": [
+          {
+            "query": "from(bucket: 'k6') |> range(start: -1h) |> filter(fn: (r) => r._measurement == 'http_requests_total')",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "req/s"
+          }
+        },
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 6
+        }
+      }
+    ]
+  },
+  "overwrite": true
+}

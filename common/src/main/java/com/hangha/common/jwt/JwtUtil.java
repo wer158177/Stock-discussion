@@ -17,7 +17,7 @@ import java.util.Date;
 public class JwtUtil {
     public static final String ACCESS_TOKEN = "ACCESS_TOKEN";
     public static final String REFRESH_TOKEN = "REFRESH_TOKEN";
-    public static final long ACCESS_TOKEN_EXPIRE_TIME = 60 * 60 * 1000L;
+    public static final long ACCESS_TOKEN_EXPIRE_TIME = 600 * 600 * 1000L;
     public static final long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;
 
     @Value("${jwt.secret.key}")
