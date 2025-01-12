@@ -1,8 +1,9 @@
-package com.hangha.mvclivechatservice.infrastructure.client;
+package com.hangha.mvclivechatservice.infrastructure.cache;
 
 
 
 import com.hangha.common.dto.UserResponseDto;
+import com.hangha.mvclivechatservice.infrastructure.client.UserFeignClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 

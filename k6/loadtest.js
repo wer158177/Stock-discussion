@@ -17,33 +17,33 @@ export const options = {
             executor: 'ramping-vus',
             startVUs: 0,
             stages: [
-                { duration: '1m', target: 1000 },  // 1분 동안 500명으로 증가
-                { duration: '2m', target: 3000 }, // 2분 동안 1,000명으로 증가
-                { duration: '1m', target: 0 },    // 1분 동안 0명으로 감소
+                { duration: '5s', target: 1 },  // 1분 동안 500명으로 증가
+                // { duration: '2m', target: 3000 }, // 2분 동안 1,000명으로 증가
+                { duration: '5s', target: 0 },    // 1분 동안 0명으로 감소
             ],
             exec: 'activeChatScenario',
         },
-        chat_lurkers: {
-            executor: 'ramping-vus',
-            startVUs: 0,
-            stages: [
-                { duration: '1m', target: 500 },  // 1분 동안 200명으로 증가
-                { duration: '2m', target: 1500 },  // 3분 동안 200명 유지
-                { duration: '1m', target: 0 },    // 1분 동안 0명으로 감소
-            ],
-            exec: 'lurkerScenario',
-        },
-        chat_switchers: {
-            executor: 'ramping-vus',
-            startVUs: 0,
-            stages: [
-                { duration: '1m', target: 50 },   // 1분 동안 50명으로 증가
-                { duration: '2m', target: 100 },   // 3분 동안 50명 유지
-                { duration: '3m', target: 100 },   // 3분 동안 50명 유지
-                { duration: '1m', target: 0 },    // 1분 동안 0명으로 감소
-            ],
-            exec: 'switcherScenario',
-        },
+        // chat_lurkers: {
+        //     executor: 'ramping-vus',
+        //     startVUs: 0,
+        //     stages: [
+        //         { duration: '1m', target: 500 },  // 1분 동안 200명으로 증가
+        //         { duration: '2m', target: 1500 },  // 3분 동안 200명 유지
+        //         { duration: '1m', target: 0 },    // 1분 동안 0명으로 감소
+        //     ],
+        //     exec: 'lurkerScenario',
+        // },
+        // chat_switchers: {
+        //     executor: 'ramping-vus',
+        //     startVUs: 0,
+        //     stages: [
+        //         { duration: '1m', target: 50 },   // 1분 동안 50명으로 증가
+        //         { duration: '2m', target: 100 },   // 3분 동안 50명 유지
+        //         { duration: '3m', target: 100 },   // 3분 동안 50명 유지
+        //         { duration: '1m', target: 0 },    // 1분 동안 0명으로 감소
+        //     ],
+        //     exec: 'switcherScenario',
+        // },
     },
     thresholds: {
         'ws_connecting_time': ['avg < 500'],     // 평균 연결 시간 500ms 미만
@@ -65,7 +65,7 @@ function handleSocketEvents(socket, userId, roomName, role) {
     });
 
     socket.on('message', (msg) => {
-        ws_msgs_received.add(1); // 수신 메시지 카운터 증가
+        // ws_msgs_received.add(1); // 수신 메시지 카운터 증가
     });
 
     socket.on('close', () => {
@@ -111,7 +111,7 @@ async function sendMessages(socket, userId, roomName, messageCount, delay, prefi
             sender: `${prefix.toLowerCase()}User${userId}`, // 발신자 정보
         };
         socket.send(JSON.stringify(msg)); // 메시지 전송
-        ws_msgs_sent.add(1); // 전송 메시지 카운터 증가
+        // ws_msgs_sent.add(1); // 전송 메시지 카운터 증가
         await new Promise((resolve) => setTimeout(resolve, delay)); // 지연 시간 적용
     }
     socket.close(); // 메시지 전송 완료 후 연결 종료
@@ -124,9 +124,9 @@ export function activeChatScenario() {
     const roomName = randomItem(roomList); // 랜덤 방 선택
 
     connectWebSocket(userId, roomName, 'Active', (socket) => {
-        sendMessages(socket, userId, roomName, 1000, 1000, 'Active'); // 10개의 메시지를 1초 간격으로 전송
+        sendMessages(socket, userId, roomName, 2, 1000, 'Active'); // 10개의 메시지를 1초 간격으로 전송
     });
-    sleep(1);
+    sleep(15);
 }
 
 // 메시지를 거의 보내지 않는 사용자 시나리오

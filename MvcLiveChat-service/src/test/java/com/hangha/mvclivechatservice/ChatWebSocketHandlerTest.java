@@ -1,7 +1,7 @@
 package com.hangha.mvclivechatservice;
 
 import com.hangha.mvclivechatservice.application.ChatApplication;
-import com.hangha.mvclivechatservice.infrastructure.ChatWebSocketHandler;
+import com.hangha.mvclivechatservice.infrastructure.websocket.ChatWebSocketHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

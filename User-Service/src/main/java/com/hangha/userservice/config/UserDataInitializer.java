@@ -47,7 +47,7 @@ public class UserDataInitializer implements CommandLineRunner {
                 .build());
 
         // 500명의 테스트 유저 추가
-        for (int i = 1; i <= 5000; i++) {
+        for (int i = 1; i <= 35000; i++) {
             String username = "testuser" + i;
             String email = username + "@example.com";
             String password = "test" + i; // 테스트용 비밀번호

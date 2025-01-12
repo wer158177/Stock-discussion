@@ -1,6 +1,6 @@
 package com.hangha.mvclivechatservice.config;
 
-import com.hangha.mvclivechatservice.infrastructure.ChatWebSocketHandler;
+import com.hangha.mvclivechatservice.infrastructure.websocket.ChatWebSocketHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;

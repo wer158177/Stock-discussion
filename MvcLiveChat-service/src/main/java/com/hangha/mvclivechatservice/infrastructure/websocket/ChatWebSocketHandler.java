@@ -1,11 +1,7 @@
-package com.hangha.mvclivechatservice.infrastructure;
+package com.hangha.mvclivechatservice.infrastructure.websocket;
 
-import com.hangha.common.dto.UserResponseDto;
 import com.hangha.mvclivechatservice.application.ChatApplication;
-import com.hangha.mvclivechatservice.domain.service.ChatService;
-import com.hangha.mvclivechatservice.infrastructure.client.UserFeignClient;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;

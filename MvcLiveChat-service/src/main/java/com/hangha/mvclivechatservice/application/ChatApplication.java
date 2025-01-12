@@ -5,7 +5,7 @@ import com.hangha.common.dto.UserResponseDto;
 import com.hangha.mvclivechatservice.domain.entity.ChatRoom;
 import com.hangha.mvclivechatservice.domain.service.ChatService;
 import com.hangha.mvclivechatservice.infrastructure.client.UserFeignClient;
-import com.hangha.mvclivechatservice.infrastructure.client.UserInfoService;
+import com.hangha.mvclivechatservice.infrastructure.cache.UserInfoService;
 import com.hangha.mvclivechatservice.infrastructure.dto.ChatMessageResponseDto;
 import com.hangha.mvclivechatservice.infrastructure.dto.IncomingMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -32,15 +32,12 @@ public class ChatApplication {
             String userIdHeader = session.getHandshakeHeaders().getFirst("X-Claim-userId");
             String roomName = session.getHandshakeHeaders().getFirst("X-Room-Name");
 
-
             if (userIdHeader == null || roomName == null) {
                 throw new IllegalArgumentException("Missing userId or roomName");
             }
 
             Long userId = Long.parseLong(userIdHeader);
             UserResponseDto userInfo = userInfoService.getUserInfo(userId);
-
-
 
             // 추가: roomName 초기화 및 검증
             if (roomName.isEmpty()) {
@@ -54,7 +51,6 @@ public class ChatApplication {
             sendErrorMessage(session, "Failed to connect: " + e.getMessage());
         }
     }
-
 
     public void handleMessage(WebSocketSession session, TextMessage message) {
         try {
@@ -71,14 +67,14 @@ public class ChatApplication {
             String roomName = incomingMessage.getRoomName();
             String content = incomingMessage.getContent();
 
-            ChatRoom chatRoom = chatService.getChatRoomByName(roomName);
             Long userId = (Long) session.getAttributes().get("userId");
             String username = (String) session.getAttributes().get("username");
             String profileUrl = (String) session.getAttributes().get("profileUrl");
 
             UserResponseDto senderInfo = new UserResponseDto(userId, username, profileUrl);
-            ChatMessageResponseDto responseDto = chatService.saveMessage(chatRoom, senderInfo, content);
+            ChatMessageResponseDto responseDto = chatService.saveMessage(roomName, senderInfo, content);
 
+            ChatRoom chatRoom = chatService.getChatRoomByName(roomName);
             chatService.broadcastMessage(chatRoom, responseDto, session);
         } catch (Exception e) {
             log.error("[ChatApplication] 메시지 처리 실패: {}", e.getMessage(), e);
@@ -101,16 +97,11 @@ public class ChatApplication {
 
             if (roomName == null) {
                 log.warn("[ChatApplication] roomName is null for sessionId: {}", session.getId());
-            } else {
-                log.info("[ChatApplication] 연결 종료 시작 - roomName: {}, sessionId: {}", roomName, session.getId());
             }
-
             chatService.removeUserFromRoom(session);
 
-            log.info("[ChatApplication] 유저 연결 종료 완료: 세션 {}", session.getId());
         } catch (Exception e) {
             log.error("[ChatApplication] 연결 종료 처리 실패: {}", e.getMessage(), e);
         }
     }
-
 }
