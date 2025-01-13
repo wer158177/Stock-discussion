@@ -2,6 +2,7 @@ package com.hangha.mvclivechatservice.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -19,6 +20,7 @@ public class ChatRoom {
     @Column(unique = true, nullable = false)
     private String name;
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
     @Builder

@@ -2,6 +2,9 @@ package com.hangha.mvclivechatservice.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -13,9 +16,8 @@ public class ChatMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chat_room_id", nullable = false)
-    private ChatRoom chatRoom;
+    @Column(nullable = false)
+    private String chatRoomName;
 
     @Column(nullable = false)
     private String senderName;  // 발신자 이름
@@ -26,11 +28,19 @@ public class ChatMessage {
     @Column(nullable = false)
     private String content;  // 메시지 내용
 
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     @Builder
-    public ChatMessage(ChatRoom chatRoom, String senderName, String senderProfileUrl, String content) {
-        this.chatRoom = chatRoom;
+    public ChatMessage(String chatRoomName, String senderName, String senderProfileUrl, String content, LocalDateTime createdAt) {
+        this.chatRoomName = chatRoomName;
         this.senderName = senderName;
         this.senderProfileUrl = senderProfileUrl;
         this.content = content;
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
+
     }
+
+
 }

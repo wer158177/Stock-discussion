@@ -28,6 +28,15 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+        jdbc:
+          batch_size: 100  # 배치 처리 크기 설정
+          order_inserts: true  # INSERT 순서 최적화
+          order_updates: true  # UPDATE 순서 최적화
+
+    chat:
+      batch-interval: 1000  # 배치 주기 (밀리초)
+      batch-size: 50        # 배치 크기
+
 
     redis:
       host: localhost

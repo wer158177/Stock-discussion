@@ -13,9 +13,11 @@ const ws_errors = new Counter('ws_errors');
 export const options = {
     scenarios: {
         websocket_test: {
-            executor: 'shared-iterations',
-            vus: parseInt(__ENV.VUS) || 1000, // 동시 사용자 수
-            iterations: parseInt(__ENV.VUS) || 1000, // 총 실행 횟수
+            executor: 'ramping-vus', // VUs를 점진적으로 증가시킴
+            startVUs: 0,  // 시작 VUs 수
+            stages: [
+                { duration: '2m', target: 1001 },  // 1분 동안 300명으로 증가
+            ],
         },
     },
     thresholds: {
@@ -27,8 +29,8 @@ export const options = {
 
 // WebSocket 서버 URL
 const url = __ENV.WS_URL || 'ws://localhost:8090/ws/chat';
-const messagesPerUser =  300; // 사용자당 메시지 전송 수
-const messageInterval = 500; // 메시지 간격(ms)
+const messagesPerUser =  100; // 사용자당 메시지 전송 수
+const messageInterval = 300; // 메시지 간격(ms)
 
 export default function () {
     const roomName = 'KRW-BTC'; // 고정된 룸 이름
@@ -54,11 +56,15 @@ export default function () {
                 // 비동기로 메시지 전송
                 async function sendMessages() {
                     for (let i = 0; i < messagesPerUser; i++) {
+                        const randomString = Math.random().toString(36).substring(2, 8);
+                        const timestamp = Date.now();
+
+
                         const message = JSON.stringify({
                             type: 'MESSAGE',
                             roomName: roomName,
                             sender: `user-${userId}`,
-                            content: `Hello from K6! Message ${i + 1}`,
+                            content: `Hello from K6! Message ${i + 1} - ${randomString} - ${timestamp}`,
                         });
 
                         socket.send(message); // 메시지 전송
@@ -69,7 +75,14 @@ export default function () {
                     }
                 }
 
-                sendMessages();
+
+
+                sendMessages().then(() => {
+                    // 메시지를 모두 전송한 후 2분(120초) 대기
+                    sleep(180); // 120초 동안 대기
+                    // 메시지를 모두 전송한 후 세션 종료
+                    socket.close();
+                });
             });
 
             // 메시지 수신 처리
@@ -101,14 +114,13 @@ export default function () {
             });
 
             socket.on('close', () => {
-                // console.log(`[INFO] WebSocket 연결 종료`);
+                console.log(`[INFO] WebSocket 연결 종료`);
             });
 
             // 연결 유지 시간 (10초 후 종료)
-            socket.setTimeout(() => {
-                // console.log(`[INFO] 테스트 종료`);
-                socket.close();
-            }, 100000);
+            socket.on('close', () => {
+                // WebSocket 연결 종료
+            });
         }
     );
 

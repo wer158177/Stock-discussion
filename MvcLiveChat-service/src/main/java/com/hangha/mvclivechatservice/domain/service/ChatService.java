@@ -10,9 +10,21 @@ import com.hangha.mvclivechatservice.domain.repository.ChatRoomRepository;
 import com.hangha.mvclivechatservice.infrastructure.cache.ChatRoomCacheManager;
 import com.hangha.mvclivechatservice.infrastructure.dto.ChatMessageResponseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -23,6 +35,10 @@ public class ChatService {
     private final WebSocketSessionManager sessionManager;
     private final ObjectMapper objectMapper;
     private final ChatRoomCacheManager chatRoomCacheManager;
+    private final Queue<ChatMessage> messageQueue = new ConcurrentLinkedQueue<>();
+    private static final int BATCH_SIZE = 500;
+
+
 
     public ChatService(ChatMessageRepository chatMessageRepository, ChatRoomRepository chatRoomRepository,
                        WebSocketSessionManager sessionManager, ObjectMapper objectMapper, ChatRoomCacheManager chatRoomCacheManager) {
@@ -46,7 +62,7 @@ public class ChatService {
                 .orElseThrow(() -> new IllegalArgumentException("Chat room with name " + roomName + " not found."));
 
         ChatMessage chatMessage = ChatMessage.builder()
-                .chatRoom(chatRoom)
+                .chatRoomName(chatRoom.getName())
                 .senderName(senderInfo.getUsername())
                 .senderProfileUrl(senderInfo.getImageUrl())
                 .content(content)
@@ -56,6 +72,43 @@ public class ChatService {
 
         return new ChatMessageResponseDto(savedMessage);
     }
+
+
+
+    @Scheduled(fixedRate = 1000) // 1초마다 실행
+    public void scheduleFlushMessagesToDatabase() {
+        flushMessagesToDatabase(); // 실제 비동기 처리 메서드를 호출
+    }
+
+    // 비동기적으로 메시지를 데이터베이스에 저장하는 메서드
+    @Async
+    public void flushMessagesToDatabase() {
+        List<ChatMessage> batch = new ArrayList<>();
+        int count = 0;
+
+        // 큐에서 최대 BATCH_SIZE만큼 메시지를 꺼내어 저장
+        while (!messageQueue.isEmpty() && count < BATCH_SIZE) {
+            batch.add(messageQueue.poll());
+            count++;
+        }
+
+        // 배치가 비어 있지 않으면 데이터베이스에 저장
+        if (!batch.isEmpty()) {
+            chatMessageRepository.saveAll(batch);
+            log.info("[ChatService] {}개의 메시지를 저장했습니다.", batch.size());
+        }
+    }
+
+    // 메시지를 큐에 추가하는 메서드
+    public void addMessageToQueue(ChatMessage message) {
+        messageQueue.add(message);
+    }
+
+
+
+
+
+
 
     /**
      * 메시지 브로드캐스트
@@ -70,17 +123,26 @@ public class ChatService {
             return; // 직렬화 실패 시 전송 중단
         }
 
+        // 너무많이나와..
+//        log.info("[ChatService] Broadcasting message to room: {}", chatRoom.getName());
+
         // 브로드캐스트 수행
         sessionManager.getSessions(chatRoom.getName()).forEach(session -> {
-            if (session.isOpen() && !session.getId().equals(senderSession.getId())) {
+            if (session.isOpen()) {
                 try {
                     synchronized (session) {
                         session.sendMessage(new TextMessage(broadcastMessage));
                     }
-                } catch (Exception e) {
+
+                } catch (IOException e) {
                     log.error("[ChatService] 메시지 전송 실패 (세션 ID: {}): {}", session.getId(), e.getMessage());
+                    sessionManager.removeSession(chatRoom.getName(), session); // 닫힌 세션 정리
                 }
+            } else {
+                log.warn("[ChatService] 닫힌 세션 감지 (세션 ID: {})", session.getId());
+                sessionManager.removeSession(chatRoom.getName(), session); // 닫힌 세션 정리
             }
+
         });
     }
 
