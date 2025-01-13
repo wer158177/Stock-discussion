@@ -16,7 +16,7 @@ export const options = {
             executor: 'ramping-vus', // VUs를 점진적으로 증가시킴
             startVUs: 0,  // 시작 VUs 수
             stages: [
-                { duration: '2m', target: 1001 },  // 1분 동안 300명으로 증가
+                { duration: '2m', target: 10001 },  // 1분 동안 300명으로 증가
             ],
         },
     },
@@ -29,7 +29,7 @@ export const options = {
 
 // WebSocket 서버 URL
 const url = __ENV.WS_URL || 'ws://localhost:8090/ws/chat';
-const messagesPerUser =  100; // 사용자당 메시지 전송 수
+const messagesPerUser =  50; // 사용자당 메시지 전송 수
 const messageInterval = 300; // 메시지 간격(ms)
 
 export default function () {

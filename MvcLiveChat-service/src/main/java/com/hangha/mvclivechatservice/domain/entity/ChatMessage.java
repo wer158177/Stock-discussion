@@ -22,7 +22,7 @@ public class ChatMessage {
     @Column(nullable = false)
     private String senderName;  // 발신자 이름
 
-    @Column(nullable = true)
+    @Column
     private String senderProfileUrl;  // 발신자 프로필 이미지 URL
 
     @Column(nullable = false)

@@ -10,6 +10,7 @@ import com.hangha.mvclivechatservice.domain.repository.ChatRoomRepository;
 import com.hangha.mvclivechatservice.infrastructure.cache.ChatRoomCacheManager;
 import com.hangha.mvclivechatservice.infrastructure.dto.ChatMessageResponseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,8 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
@@ -39,14 +38,18 @@ public class ChatService {
     private static final int BATCH_SIZE = 500;
 
 
+    private final JdbcTemplate jdbcTemplate;
+
+
 
     public ChatService(ChatMessageRepository chatMessageRepository, ChatRoomRepository chatRoomRepository,
-                       WebSocketSessionManager sessionManager, ObjectMapper objectMapper, ChatRoomCacheManager chatRoomCacheManager) {
+                       WebSocketSessionManager sessionManager, ObjectMapper objectMapper, ChatRoomCacheManager chatRoomCacheManager, JdbcTemplate jdbcTemplate) {
         this.chatMessageRepository = chatMessageRepository;
         this.chatRoomRepository = chatRoomRepository;
         this.sessionManager = sessionManager;
         this.objectMapper = objectMapper;
         this.chatRoomCacheManager = chatRoomCacheManager;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     /**
@@ -75,33 +78,73 @@ public class ChatService {
 
 
 
-    @Scheduled(fixedRate = 1000) // 1초마다 실행
-    public void scheduleFlushMessagesToDatabase() {
-        flushMessagesToDatabase(); // 실제 비동기 처리 메서드를 호출
+//    @Scheduled(fixedRate = 1000) // 1초마다 실행
+//    public void scheduleFlushMessagesToDatabase() {
+//        flushMessagesToDatabase(); // 실제 비동기 처리 메서드를 호출
+//    }
+//
+//    // 비동기적으로 메시지를 데이터베이스에 저장하는 메서드
+//    @Async
+//    public void flushMessagesToDatabase() {
+//        List<ChatMessage> batch = new ArrayList<>();
+//        int count = 0;
+//
+//        // 큐에서 최대 BATCH_SIZE만큼 메시지를 꺼내어 저장
+//        while (!messageQueue.isEmpty() && count < BATCH_SIZE) {
+//            batch.add(messageQueue.poll());
+//            count++;
+//        }
+//
+//        // 배치가 비어 있지 않으면 데이터베이스에 저장
+//        if (!batch.isEmpty()) {
+//            chatMessageRepository.saveAll(batch);
+//            log.info("[ChatService] {}개의 메시지를 저장했습니다.", batch.size());
+//        }
+//    }
+//
+
+
+
+    // 메시지를 큐에 추가하는 메서드
+    public void addMessageToQueue(ChatMessage message) {
+        messageQueue.add(message);
     }
 
-    // 비동기적으로 메시지를 데이터베이스에 저장하는 메서드
+
     @Async
+    @Scheduled(fixedRate = 1000) // 1초마다 실행
     public void flushMessagesToDatabase() {
         List<ChatMessage> batch = new ArrayList<>();
         int count = 0;
 
-        // 큐에서 최대 BATCH_SIZE만큼 메시지를 꺼내어 저장
+        // 큐에서 최대 BATCH_SIZE만큼 메시지를 꺼냄
         while (!messageQueue.isEmpty() && count < BATCH_SIZE) {
             batch.add(messageQueue.poll());
             count++;
         }
 
-        // 배치가 비어 있지 않으면 데이터베이스에 저장
         if (!batch.isEmpty()) {
-            chatMessageRepository.saveAll(batch);
-            log.info("[ChatService] {}개의 메시지를 저장했습니다.", batch.size());
-        }
-    }
+            String sql = "INSERT INTO chat_message (chat_room_name, content, created_at, sender_name, sender_profile_url) VALUES (?, ?, ?, ?, ?)";
 
-    // 메시지를 큐에 추가하는 메서드
-    public void addMessageToQueue(ChatMessage message) {
-        messageQueue.add(message);
+            List<Object[]> batchArgs = new ArrayList<>();
+            for (ChatMessage message : batch) {
+                batchArgs.add(new Object[]{
+                        message.getChatRoomName(),
+                        message.getContent(),
+                        message.getCreatedAt(),
+                        message.getSenderName(),
+                        message.getSenderProfileUrl() != null ? message.getSenderProfileUrl() : ""
+                });
+            }
+
+            try {
+                // 파라미터 배열로 batchUpdate 호출
+                jdbcTemplate.batchUpdate(sql, batchArgs);
+                log.info("[ChatService] {}개의 메시지를 저장했습니다.", batch.size());
+            } catch (Exception e) {
+                log.error("[ChatService] 배치 인서트 실패: {}", e.getMessage(), e);
+            }
+        }
     }
 
 
