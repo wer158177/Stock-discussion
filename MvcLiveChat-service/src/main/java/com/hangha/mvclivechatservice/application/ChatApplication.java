@@ -65,6 +65,10 @@ public class ChatApplication {
         }
     }
 
+
+//    /**
+//     * 개선전 코드
+//     */
 //    public void handleMessage(WebSocketSession session, TextMessage message) {
 //        try {
 //            String payload = message.getPayload();
@@ -96,6 +100,9 @@ public class ChatApplication {
 //    }
 
 
+    /**
+     * 배치인서트 캐싱 개선후 코드
+     */
     public void handleMessage(WebSocketSession session, TextMessage message) {
         try {
             String payload = message.getPayload();

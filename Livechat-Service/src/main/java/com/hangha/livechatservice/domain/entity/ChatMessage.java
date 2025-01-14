@@ -1,33 +1,33 @@
 package com.hangha.livechatservice.domain.entity;
 
-import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
 @Getter
-@NoArgsConstructor
-@Entity
-@Table(name = "chat_messages")
+@Builder
+@Table("chat_message")
 public class ChatMessage {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false)
-    private MessageRoom messageRoom;
+    private String chatRoomName;
+    private String senderName;
+    private String senderProfileUrl;
+    private String content;
+    private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    private String senderId;
-
-    @Column(nullable = false)
-    private String message;
-
-    @Column(nullable = false)
-    private LocalDateTime timestamp = LocalDateTime.now();
-
-
+    // 모든 필드를 포함한 생성자 추가
+    public ChatMessage(Long id, String chatRoomName, String senderName, String senderProfileUrl, String content, LocalDateTime createdAt) {
+        this.id = id;
+        this.chatRoomName = chatRoomName;
+        this.senderName = senderName;
+        this.senderProfileUrl = senderProfileUrl;
+        this.content = content;
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now(); // createdAt이 null이면 현재 시간
+    }
 }
-

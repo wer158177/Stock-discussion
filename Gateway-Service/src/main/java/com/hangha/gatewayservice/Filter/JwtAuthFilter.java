@@ -135,8 +135,8 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
         // 공개 경로 목록
         List<String> publicPaths = Arrays.asList(
                 "/api/auth/login",
-                "/api/user/register",
-                "/api/user/refresh",
+                "/user-service/api/auth/register",
+                "/user-service/api/auth/register",
                 "/stock-service/ws/ticker",
                 "/stock-service/ws/minute"
         );

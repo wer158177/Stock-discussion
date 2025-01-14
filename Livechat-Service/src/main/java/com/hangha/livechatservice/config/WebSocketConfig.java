@@ -1,16 +1,24 @@
 package com.hangha.livechatservice.config;
 
+import com.hangha.livechatservice.infrastructure.websocket.ChatWebSocketHandler;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
+
+import java.util.Map;
 
 @Configuration
-@EnableWebSocket
-public class WebSocketConfig implements WebSocketConfigurer {
-    @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new ChatWebSocketHandler(), "/ws/chat")
-                .setAllowedOrigins("*");
+public class WebSocketConfig {
+
+    @Bean
+    public HandlerMapping webSocketMapping(ChatWebSocketHandler chatWebSocketHandler) {
+        return new SimpleUrlHandlerMapping(Map.of("/chat", chatWebSocketHandler), 1);
+    }
+
+    @Bean
+    public WebSocketHandlerAdapter handlerAdapter() {
+        return new WebSocketHandlerAdapter();
     }
 }

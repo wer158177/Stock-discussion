@@ -16,7 +16,7 @@ export const options = {
             executor: 'ramping-vus', // VUs를 점진적으로 증가시킴
             startVUs: 0,  // 시작 VUs 수
             stages: [
-                { duration: '2m', target: 10001 },  // 1분 동안 300명으로 증가
+                { duration: '2m', target: 501 },  // 1분 동안 300명으로 증가
             ],
         },
     },
@@ -28,9 +28,9 @@ export const options = {
 };
 
 // WebSocket 서버 URL
-const url = __ENV.WS_URL || 'ws://localhost:8090/ws/chat';
-const messagesPerUser =  50; // 사용자당 메시지 전송 수
-const messageInterval = 300; // 메시지 간격(ms)
+const url = __ENV.WS_URL || 'ws://localhost:8091/chat';
+const messagesPerUser =  300; // 사용자당 메시지 전송 수
+const messageInterval = 100; // 메시지 간격(ms)
 
 export default function () {
     const roomName = 'KRW-BTC'; // 고정된 룸 이름
@@ -89,15 +89,15 @@ export default function () {
             socket.on('message', (msg) => {
                 const receiveTime = Date.now() - startTime; // 수신 시간 계산
                 try {
-                    const parsed = JSON.parse(msg);
-                    const messageKey = `${parsed.sender.name}-${parsed.content}-${parsed.timestamp}`;
+                    // const parsed = JSON.parse(msg);
+                    // const messageKey = `${parsed.sender.name}-${parsed.content}-${parsed.timestamp}`;
 
-                    if (processedMessages.has(messageKey)) {
-                        console.log(`[DEBUG] 중복 메시지 무시: ${msg}`);
-                        return;
-                    }
+                    // if (processedMessages.has(messageKey)) {
+                    //     console.log(`[DEBUG] 중복 메시지 무시: ${msg}`);
+                    //     return;
+                    // }
 
-                    processedMessages.add(messageKey);
+                    // processedMessages.add(messageKey);
                     // ws_msgs_received.add(1); // 수신 메트릭 증가
                     ws_response_time.add(receiveTime);
 

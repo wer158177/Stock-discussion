@@ -21,7 +21,13 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,21 +85,23 @@ class ChatServiceTest {
 
     @Test
     void shouldBroadcastMessageToOpenSessions() throws Exception {
-        // 열려 있는 세션에 메시지를 전송하는 테스트
-
         // Given
         CopyOnWriteArrayList<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
         sessions.add(openSession); // 열려 있는 세션 추가
-        when(sessionManager.getSessions(chatRoom.getName())).thenReturn(sessions); // 세션 매니저에서 반환 설정
-        when(objectMapper.writeValueAsString(responseDto)).thenReturn("Serialized Message"); // JSON 직렬화 결과 설정
+        when(sessionManager.getSessions(chatRoom.getName())).thenReturn(sessions); // 세션 반환 설정
+        when(objectMapper.writeValueAsString(responseDto)).thenReturn("Serialized Message"); // 메시지 직렬화 설정
 
         // When
         chatService.broadcastMessage(chatRoom, responseDto, null);
 
+        // 비동기 작업 대기
+        Thread.sleep(100); // 비동기 작업이 완료되도록 대기
+
         // Then
         verify(openSession).sendMessage(any(TextMessage.class)); // 메시지 전송 확인
-        verify(sessionManager, never()).removeSession(chatRoom.getName(), openSession); // 세션 삭제되지 않았는지 확인
+        verify(sessionManager, never()).removeSession(chatRoom.getName(), openSession); // 세션이 삭제되지 않았는지 확인
     }
+
 
     @Test
     void shouldRemoveClosedSession() throws Exception {
@@ -181,24 +189,80 @@ class ChatServiceTest {
 
     @Test
     void shouldHandleSessionDisconnectionGracefully() throws Exception {
-        // 세션 연결이 끊어졌을 경우의 처리 테스트
-
         // Given
         CopyOnWriteArrayList<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
         sessions.add(openSession);
         when(sessionManager.getSessions(chatRoom.getName())).thenReturn(sessions);
         when(objectMapper.writeValueAsString(responseDto)).thenReturn("Serialized Message");
 
+        // WebSocketSession의 attributes에 roomName 설정
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("roomName", chatRoom.getName());
+        when(openSession.getAttributes()).thenReturn(attributes);
+
         // 연결 끊김 시뮬레이션
         doThrow(new IOException("Connection reset by peer"))
-                .when(openSession).sendMessage(new TextMessage("Serialized Message"));
+                .when(openSession).sendMessage(any(TextMessage.class));
+
+        // CountDownLatch 설정
+        CountDownLatch latch = new CountDownLatch(1);
+        doAnswer(invocation -> {
+            latch.countDown(); // 세션 제거 시 Latch 감소
+            return null;
+        }).when(sessionManager).removeSession(chatRoom.getName(), openSession);
+
+        // When
+        chatService.broadcastMessage(chatRoom, responseDto, null);
+
+        // 비동기 작업 대기
+        if (!latch.await(5, TimeUnit.SECONDS)) {
+            fail("비동기 작업이 시간 내에 완료되지 않았습니다.");
+        }
+
+        // Then
+        verify(sessionManager).removeSession(chatRoom.getName(), openSession); // 끊어진 세션 제거 확인
+    }
+
+
+
+    @Test
+    void shouldUseParallelStreamForLargeNumberOfSessions() throws Exception {
+        // Given
+        CopyOnWriteArrayList<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
+
+        for (int i = 0; i < 150; i++) { // 150개의 세션 추가 (임계값 100 초과)
+            WebSocketSession session = mock(WebSocketSession.class);
+            when(session.isOpen()).thenReturn(true);
+            sessions.add(session);
+        }
+        when(sessionManager.getSessions(chatRoom.getName())).thenReturn(sessions);
+        when(objectMapper.writeValueAsString(responseDto)).thenReturn("Serialized Message");
+
+        // When
+        chatService.broadcastMessage(chatRoom, responseDto, null);
+
+        // 비동기 작업 대기
+        Thread.sleep(500); // 충분히 대기하여 모든 메시지 전송이 완료되도록 설정
+
+        // Then
+        for (WebSocketSession session : sessions) {
+            verify(session).sendMessage(any(TextMessage.class)); // 모든 세션에 메시지가 전송되었는지 확인
+        }
+    }
+
+    @Test
+    void shouldNotBroadcastMessageWhenSerializationFails() throws Exception {
+        // Given
+        when(objectMapper.writeValueAsString(responseDto)).thenThrow(new JsonProcessingException("Serialization error") {});
 
         // When
         chatService.broadcastMessage(chatRoom, responseDto, null);
 
         // Then
-        verify(sessionManager).removeSession(chatRoom.getName(), openSession); // 끊어진 세션 제거 확인
+        verifyNoInteractions(sessionManager); // 세션 매니저와의 상호작용이 없는지 확인
     }
+
+
 
 
     @Test
