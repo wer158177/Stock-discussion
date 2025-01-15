@@ -1,12 +1,12 @@
-package com.hangha.livechatservice.application;
+package com.hangha.livechatservice.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hangha.common.dto.UserResponseDto;
-import com.hangha.livechatservice.domain.service.BatchProcessor;
 import com.hangha.livechatservice.domain.entity.ChatMessage;
-import com.hangha.livechatservice.domain.service.ChatService;
+import com.hangha.livechatservice.domain.entity.ChatRoom;
+import com.hangha.livechatservice.domain.service.BatchProcessor;
+import com.hangha.livechatservice.domain.service.MessageBroadcaster;
 import com.hangha.livechatservice.infrastructure.cache.ChatRoomCacheManager;
-import com.hangha.livechatservice.infrastructure.cache.UserInfoService;
 import com.hangha.livechatservice.infrastructure.dto.ChatMessageResponseDto;
 import com.hangha.livechatservice.infrastructure.dto.IncomingMessage;
 import org.springframework.stereotype.Service;
@@ -17,37 +17,16 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 @Service
-public class ChatApplication {
+public class MessageHandler {
 
-    private final ChatService chatService;
-    private final UserInfoService userInfoService;
+    private final MessageBroadcaster broadcaster;
     private final ChatRoomCacheManager chatRoomCacheManager;
     private final BatchProcessor batchProcessor;
 
-    public ChatApplication(ChatService chatService, UserInfoService userInfoService, ChatRoomCacheManager chatRoomCacheManager, BatchProcessor batchProcessor) {
-        this.chatService = chatService;
-        this.userInfoService = userInfoService;
+    public MessageHandler( MessageBroadcaster broadcaster, ChatRoomCacheManager chatRoomCacheManager, BatchProcessor batchProcessor) {
+        this.broadcaster = broadcaster;
         this.chatRoomCacheManager = chatRoomCacheManager;
         this.batchProcessor = batchProcessor;
-    }
-
-    public Mono<Void> handleConnection(WebSocketSession session) {
-        String userIdHeader = session.getHandshakeInfo().getHeaders().getFirst("X-Claim-userId");
-        String roomName = session.getHandshakeInfo().getHeaders().getFirst("X-Room-Name");
-
-        if (userIdHeader == null || roomName == null) {
-            return Mono.error(new IllegalArgumentException("Missing userId or roomName in headers"));
-        }
-
-        Long userId;
-        try {
-            userId = Long.parseLong(userIdHeader);
-        } catch (NumberFormatException e) {
-            return Mono.error(new IllegalArgumentException("Invalid userId format"));
-        }
-
-        return userInfoService.getUserInfo(userId)
-                .flatMap(userInfo -> chatService.addUserToRoom(session, userInfo, roomName));
     }
 
     public Mono<Void> handleMessage(WebSocketSession session, String messagePayload) {
@@ -80,7 +59,7 @@ public class ChatApplication {
                                 .createdAt(LocalDateTime.now())
                                 .build();
 
-                        batchProcessor.addMessageToQueue(chatMessage);
+                        batchProcessor.enqueueMessage(chatMessage);
 
                         ChatMessageResponseDto responseDto = new ChatMessageResponseDto(
                                 "MESSAGE", chatMessage.getChatRoomName(),
@@ -92,7 +71,7 @@ public class ChatApplication {
                                         .toEpochMilli())
                         );
 
-                        return chatService.broadcastMessage(session, responseDto);
+                        return broadcaster.broadcast(session, responseDto);
                     });
         });
     }
@@ -102,8 +81,6 @@ public class ChatApplication {
         return session.send(Mono.just(session.textMessage(errorJson)));
     }
 
-    public Mono<Void> handleDisconnection(WebSocketSession session) {
-        String roomName = (String) session.getAttributes().get("roomName");
-        return chatService.removeUserFromRoom(session);
-    }
+
+
 }

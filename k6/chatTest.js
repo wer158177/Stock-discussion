@@ -16,7 +16,7 @@ export const options = {
             executor: 'ramping-vus', // VUs를 점진적으로 증가시킴
             startVUs: 0,  // 시작 VUs 수
             stages: [
-                { duration: '2m', target: 501 },  // 1분 동안 300명으로 증가
+                { duration: '2m', target: 401 },  // 1분 동안 300명으로 증가
             ],
         },
     },
