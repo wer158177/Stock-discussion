@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 public class MessageBroadcaster {
@@ -21,17 +22,34 @@ public class MessageBroadcaster {
         this.objectMapper = new ObjectMapper();
     }
 
+//    public Mono<Void> broadcast(WebSocketSession senderSession, ChatMessageResponseDto responseDto) {
+//        String roomName = responseDto.getRoomName();
+//        String broadcastMessage = getSerializedMessage(responseDto); // 캐싱된 직렬화 메시지
+//
+//        return sessionManager.getSessions(roomName)
+//                .filter(session -> session.isOpen() && !session.equals(senderSession))
+//                .onBackpressureLatest() // 최신 메시지 우선 처리
+//                .flatMap(session -> session.send(Mono.just(session.textMessage(broadcastMessage)))
+//                        .doOnError(error -> handleFailedSession(session, error)), 10) // 동시성 10
+//                .then();
+//    }
+
+
     public Mono<Void> broadcast(WebSocketSession senderSession, ChatMessageResponseDto responseDto) {
         String roomName = responseDto.getRoomName();
-        String broadcastMessage = getSerializedMessage(responseDto); // 캐싱된 직렬화 메시지
+        String broadcastMessage = getSerializedMessage(responseDto);
 
         return sessionManager.getSessions(roomName)
-                .filter(session -> session.isOpen() && !session.equals(senderSession))
-                .onBackpressureLatest() // 최신 메시지 우선 처리
+                .filter(session -> session.isOpen() && !session.getId().equals(senderSession.getId())) // 본인을 제외한 세션 필터링
+                .parallel()
+                .runOn(Schedulers.parallel()) // 병렬 처리
                 .flatMap(session -> session.send(Mono.just(session.textMessage(broadcastMessage)))
-                        .doOnError(error -> handleFailedSession(session, error)), 10) // 동시성 10
+                        .doOnError(error -> handleFailedSession(session, error)))
+                .sequential() // 병렬 처리가 끝나면 순차적으로 결합
                 .then();
     }
+
+
 
     private String getSerializedMessage(ChatMessageResponseDto responseDto) {
         try {
@@ -48,6 +66,15 @@ public class MessageBroadcaster {
                 .doOnError(removalError -> logger.error("세션 {} 제거 실패: {}", session.getId(), removalError.getMessage()))
                 .subscribe();
     }
+
+
+
+
+
+
+
+
+
 
 
 

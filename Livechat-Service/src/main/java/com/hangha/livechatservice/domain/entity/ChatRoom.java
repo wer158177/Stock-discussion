@@ -6,23 +6,27 @@ package com.hangha.livechatservice.domain.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
-@Table("chat_room")
+@Document("chat_room")
 public class ChatRoom {
 
     @Id
-    private Long id;
+    private String id;
 
-    private String name;
+    @Field("room_name")
+    private String roomName;
     private LocalDateTime createdAt;
 
-    public ChatRoom(String name) {
-        this.name = name;
+    public ChatRoom(String id,String name) {
+        this.id = id;
+        this.roomName = name;
         this.createdAt = LocalDateTime.now();
     }
 }

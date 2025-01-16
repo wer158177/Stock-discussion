@@ -24,12 +24,9 @@ spring:
       initial-size: 10 # 초기 연결 크기
       max-idle-time: 30s # 연결 유지 시간
 
-#
-#    flyway:
-#      enabled: true
-#      url: jdbc:mysql://localhost:3306/chat_service
-#      user: root
-#      password: 4029
+  data:
+    mongodb:
+      uri: mongodb://root:example@localhost:27017/chat_app?authSource=admin
 
     redis:
       host: localhost
@@ -39,16 +36,16 @@ spring:
 
 
 
-  management:
-    metrics:
-      export:
-        influx:
-          enabled: true
-          uri: http://localhost:8086
-          db: my-bucket
-          user: myuser
-          password: mypassword
-          autoCreateDb: true
+#  management:
+#    metrics:
+#      export:
+#        influx:
+#          enabled: true
+#          uri: http://localhost:8086
+#          db: my-bucket
+#          user: myuser
+#          password: mypassword
+#          autoCreateDb: true
 
 mvc:
   cors:

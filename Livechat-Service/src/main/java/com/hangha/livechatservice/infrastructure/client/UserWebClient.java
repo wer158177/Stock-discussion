@@ -21,7 +21,6 @@ public class UserWebClient {
                 .uri("/api/user/{userId}", userId) // 기본 URL은 WebClientConfig에서 설정
                 .retrieve()
                 .bodyToMono(UserResponseDto.class)
-                .doOnNext(userInfo -> log.info("[UserWebClient] 사용자 정보 조회 성공: userId={}, username={}", userId, userInfo.getUsername()))
                 .onErrorResume(e -> {
                     return Mono.empty(); // 기본값 반환
                 });

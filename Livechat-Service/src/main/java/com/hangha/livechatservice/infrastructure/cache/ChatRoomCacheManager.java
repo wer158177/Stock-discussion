@@ -18,7 +18,7 @@ public class ChatRoomCacheManager {
     private final ObjectMapper objectMapper;
 
     public Mono<Boolean> cacheChatRoom(ChatRoom chatRoom) {
-        String key = CHATROOM_KEY_PREFIX + chatRoom.getName();
+        String key = CHATROOM_KEY_PREFIX + chatRoom.getRoomName();
         try {
             String value = objectMapper.writeValueAsString(chatRoom);
 
@@ -43,7 +43,7 @@ public class ChatRoomCacheManager {
                     }
                 })
                 .switchIfEmpty(
-                        chatRoomRepository.findByName(roomName)
+                        chatRoomRepository.findByRoomName(roomName)
                                 .flatMap(chatRoom -> cacheChatRoom(chatRoom).thenReturn(chatRoom))
                                 .switchIfEmpty(Mono.error(new IllegalArgumentException("채팅방을 찾을 수 없습니다: " + roomName)))
                 );

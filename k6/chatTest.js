@@ -16,7 +16,7 @@ export const options = {
             executor: 'ramping-vus', // VUs를 점진적으로 증가시킴
             startVUs: 0,  // 시작 VUs 수
             stages: [
-                { duration: '2m', target: 401 },  // 1분 동안 300명으로 증가
+                { duration: '2m', target: 101 },  // 1분 동안 300명으로 증가
             ],
         },
     },
@@ -29,8 +29,8 @@ export const options = {
 
 // WebSocket 서버 URL
 const url = __ENV.WS_URL || 'ws://localhost:8091/chat';
-const messagesPerUser =  300; // 사용자당 메시지 전송 수
-const messageInterval = 100; // 메시지 간격(ms)
+const messagesPerUser =  500; // 사용자당 메시지 전송 수
+const messageInterval = 50; // 메시지 간격(ms)
 
 export default function () {
     const roomName = 'KRW-BTC'; // 고정된 룸 이름
@@ -79,12 +79,14 @@ export default function () {
 
                 sendMessages().then(() => {
                     // 메시지를 모두 전송한 후 2분(120초) 대기
-                    sleep(180); // 120초 동안 대기
+                    sleep(240); // 120초 동안 대기
                     // 메시지를 모두 전송한 후 세션 종료
                     socket.close();
                 });
             });
 
+
+            let receivedMessages = 0;
             // 메시지 수신 처리
             socket.on('message', (msg) => {
                 const receiveTime = Date.now() - startTime; // 수신 시간 계산
@@ -100,7 +102,7 @@ export default function () {
                     // processedMessages.add(messageKey);
                     // ws_msgs_received.add(1); // 수신 메트릭 증가
                     ws_response_time.add(receiveTime);
-
+                    receivedMessages++;
                     // console.log(`[INFO] 메시지 수신: ${msg}`);
                 } catch (e) {
                     ws_errors.add(1);
@@ -119,6 +121,7 @@ export default function () {
 
             // 연결 유지 시간 (10초 후 종료)
             socket.on('close', () => {
+                console.log(`WebSocket 연결 종료 - 총 수신 메시지: ${receivedMessages}`);
                 // WebSocket 연결 종료
             });
         }
@@ -126,4 +129,5 @@ export default function () {
 
     // WebSocket 연결 체크
     check(res, { 'WebSocket 연결 성공': (r) => r && r.status === 101 });
+
 }
