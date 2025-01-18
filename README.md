@@ -11,13 +11,13 @@ MSA 환경에서 설계되어 SNS, 주식 데이터, 실시간 처리 서비스�
 ### 프로젝트 목표
 
 1. **대규모 데이터 처리**  
-   WebSocket과 SSE 기반의 비동기 처리로 높은 동시 사용자 트래픽을 안정적으로 처리하고, Kafka를 활용해 이벤트 기반 데이터 흐름을 효율적으로 관리.  
+   WebSocket과 SSE 기반의 비동기 처리로 높은 동시 사용자 트래픽을 안정적으로 처리하고, Kafka를 활용해 이벤트 기반 데이터 흐름을 효율적으로 관리.
 
 2. **안정성과 성능 최적화**  
-   Spring WebFlux를 활용해 논블로킹 I/O로 실시간 데이터의 전송 속도를 최적화하고, Redis 캐싱을 통해 데이터 접근 속도를 향상.  
+   Spring WebFlux를 활용해 논블로킹 I/O로 실시간 데이터의 전송 속도를 최적화하고, Redis 캐싱을 통해 데이터 접근 속도를 향상.
 
 3. **MSA 기반 확장성**  
-   Spring Cloud Gateway와 Eureka를 활용한 MSA 환경으로 서비스 간 독립성을 확보하고, 오토스케일링을 통해 높은 트래픽에도 유연하게 대응.  
+   Spring Cloud Gateway와 Eureka를 활용한 MSA 환경으로 서비스 간 독립성을 확보하고, 오토스케일링을 통해 높은 트래픽에도 유연하게 대응.
 
 
 ---
@@ -59,22 +59,22 @@ MSA 환경에서 설계되어 SNS, 주식 데이터, 실시간 처리 서비스�
   <summary><span style="font-size: 21px;">🛠️ 기술 스택</summary>
 
 ### **Backend**
-Spring Boot, Spring Cloud Gateway, Eureka, OpenFeign, Spring Security, Spring WebFlux, Apache Kafka  
+Spring Boot, Spring Cloud Gateway, Eureka, OpenFeign, Spring Security, Spring WebFlux, Apache Kafka
 
 ### **Database**
-MySQL, PostgreSQL, Redis (캐싱)  
+MySQL, PostgreSQL, Redis (캐싱)
 
 ### **Real-Time Communication**
-WebSocket, Server-Sent Events (SSE)  
+WebSocket, Server-Sent Events (SSE)
 
 ### **External API Integration**
-Upbit Open API  
+Upbit Open API
 
 ### **Monitoring & Testing**
-Grafana, InfluxDB, K6, Telegraf  
+Grafana, InfluxDB, K6, Telegraf
 
 ### **Infrastructure**
-Docker, Docker Compose  
+Docker, Docker Compose
 
 </details>
 
@@ -115,9 +115,9 @@ Docker, Docker Compose
 
 ## 핵심 기능
 
-- **실시간 채팅 (Reactive)**: WebSocket과 Spring WebFlux 기반 비동기 논블로킹 실시간 채팅.  
-- **Server-Sent Events (SSE, Reactive)**: 실시간 알림을 안정적으로 제공.  
-- **업비트 실시간 정보 제공**: Upbit API를 통해 실시간 Ticker 및 캔들 데이터 수집.  
+- **실시간 채팅 (Reactive)**: WebSocket과 Spring WebFlux 기반 비동기 논블로킹 실시간 채팅.
+- **Server-Sent Events (SSE, Reactive)**: 실시간 알림을 안정적으로 제공.
+- **업비트 실시간 정보 제공**: Upbit API를 통해 실시간 Ticker 및 캔들 데이터 수집.
 
 ---
 
