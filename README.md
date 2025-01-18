@@ -56,8 +56,7 @@ MSA 환경에서 설계되어 SNS, 주식 데이터, 실시간 처리 서비스�
 </details>
 
 <details>
-  <summary><span style="font-size: 21px;">🛠️ 기술 스택</summary>
-
+  <summary><span style="font-size: 21px;">🛠️ 기술 스택 </summary>
 ### **Backend**
 Spring Boot, Spring Cloud Gateway, Eureka, OpenFeign, Spring Security, Spring WebFlux, Apache Kafka
 

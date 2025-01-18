@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>MSA 서비스 API 문서</title>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background: #f8f9fa;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .content {
+            margin-left: 270px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .endpoint {
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .method {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            color: white;
+            font-weight: bold;
+        }
+        .get { background-color: #61affe; }
+        .post { background-color: #49cc90; }
+        .put, .patch { background-color: #fca130; }
+        .delete { background-color: #f93e3e; }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .service-title {
+            margin-top: 40px;
+            padding: 20px 0;
+            border-bottom: 2px solid #ddd;
+            color: #2c3e50;
+        }
+        .service-section {
+            margin-top: 60px;
+            padding-top: 20px;
+        }
+        .nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        .nav ul li {
+            margin: 10px 0;
+        }
+        .nav ul li a {
+            color: #2c3e50;
+            text-decoration: none;
+        }
+        .nav ul li a:hover {
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <h2>목차</h2>
+        <ul>
+            <li>
+                <h3>Gateway Service</h3>
+                <ul>
+                    <li><a href="#gateway">게이트웨이 서비스</a></li>
+                    <li><a href="#overview">서비스 개요</a></li>
+                    <li><a href="#routes">라우팅 설정</a></li>
+                    <li><a href="#filters">필터 설정</a></li>
+                    <li><a href="#cors">CORS 설정</a></li>
+                    <li><a href="#security">보안 설정</a></li>
+                </ul>
+            </li>
+            <li>
+                <h3>User Service</h3>
+                <ul>
+                    <li><a href="#common">공통 사항</a></li>
+                    <li><a href="#auth">인증 API</a></li>
+                    <li><a href="#user">사용자 API</a></li>
+                </ul>
+            </li>
+            <li>
+                <h3>Post Service</h3>
+                <ul>
+                    <li><a href="#post">게시글 API</a></li>
+                    <li><a href="#like">좋아요 API</a></li>
+                    <li><a href="#status">상태 관리 API</a></li>
+                </ul>
+            </li>
+            <li>
+                <h3>Comment Service</h3>
+                <ul>
+                    <li><a href="#comments">댓글 API</a></li>
+                    <li><a href="#comment-like">댓글 좋아요 API</a></li>
+                </ul>
+            </li>
+            <li>
+                <h3>Activity Service</h3>
+                <ul>
+                    <li><a href="#alarms">알림 API</a></li>
+                    <li><a href="#activity-types">활동 유형</a></li>
+                    <li><a href="#error-responses">에러 응답</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="content container">
+        <h1>MSA 서비스 API 문서</h1>
+
+        <!-- Gateway Service -->
+        <section class="service-section" id="gateway">
+            <h1 class="service-title">Gateway Service</h1>
+            <section id="gateway-overview">
+                <div class="container">
+                    <h1>Gateway Service API 문서</h1>
+            
+                    <section id="overview">
+                        <h2>서비스 개요</h2>
+                        <p>포트: 8000</p>
+                        <p>Eureka Client 포트: 8761</p>
+                    </section>
+            
+                    <section id="routes">
+                        <h2>라우팅 설정</h2>
+                        
+                        <div class="route">
+                            <h3>User Service</h3>
+                            <pre>
+            Path: /user-service/**
+            URI: lb://user-service
+            Filters: 
+            - StripPrefix=1
+            - RemoveRequestHeader=Origin</pre>
+                        </div>
+            
+                        <div class="route">
+                            <h3>Post Service</h3>
+                            <pre>
+            Path: /post-service/**
+            URI: lb://post-service
+            Filters: 
+            - StripPrefix=1</pre>
+                        </div>
+            
+                        <div class="route">
+                            <h3>Comment Service</h3>
+                            <pre>
+            Path: /comment-service/**
+            URI: lb://comment-service
+            Filters: 
+            - StripPrefix=1</pre>
+                        </div>
+                    </section>
+            
+                    <section id="filters">
+                        <h2>필터 설정</h2>
+            
+                        <div class="endpoint">
+                            <h3>JWT Filter</h3>
+                            <p>인증 제외 경로:</p>
+                            <pre>
+            - /api/user/register
+            - /api/user/login
+            - /api/user/refresh</pre>
+                            <p>인증 헤더:</p>
+                            <pre>Authorization: Bearer {token}</pre>
+                        </div>
+            
+                        <div class="endpoint">
+                            <h3>Global Filter</h3>
+                            <p>모든 요청에 적용되는 필터</p>
+                            <pre>
+            baseMessage: "Spring Cloud Gateway Global Filter"
+            preLogger: true
+            postLogger: true</pre>
+                        </div>
+            
+                        <div class="endpoint">
+                            <h3>Logging Filter</h3>
+                            <p>요청/응답 로깅</p>
+                            <pre>
+            - Request ID 로깅
+            - Response Status Code 로깅</pre>
+                        </div>
+                    </section>
+            
+                    <section id="cors">
+                        <h2>CORS 설정</h2>
+                        <pre>
+            allowedOrigins: 
+            - http://localhost:3000
+            
+            allowedMethods:
+            - GET
+            - POST
+            - PUT
+            - DELETE    
+            - OPTIONS
+            
+            allowedHeaders: "*"
+            allowCredentials: true</pre>
+                    </section>
+            
+                    <section id="security">
+                        <h2>보안 설정</h2>
+                        <p>JWT 설정:</p>
+                        <pre>jwt.secret.key: {JWT_SECRET_KEY}</pre>
+                    </section>
+                </div>
+            </section>
+        </section>
+
+        <section class="service-section" id="user">
+            <h1 class="service-title">User Service</h1>
+            <div class="container">
+                <section id="common">
+                    <h2>공통 사항</h2>
+                    <p>기본 URL: <code>http://localhost:8082</code></p>
+                    <p>인증 헤더:</p>
+                    <pre>
+        {
+            "Authorization": "Bearer {access_token}"
+        }</pre>
+                </section>
+        
+                <section id="auth">
+                    <h2 class="service-title">인증 API</h2>
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <code>/api/user/login</code>
+                        <h3>로그인</h3>
+                        <p>Request:</p>
+                        <pre>
+        {
+            "email": "user@example.com",
+            "password": "password123!"
+        }</pre>
+                        <p>Response: (200 OK)</p>
+                        <pre>
+        {
+            "accessToken": "eyJhbG...",
+            "refreshToken": "eyJhbG..."
+        }</pre>
+                    </div>
+        
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <code>/api/user/refresh</code>
+                        <h3>토큰 갱신</h3>
+                        <p>Response: (200 OK)</p>
+                        <pre>
+        {
+            "accessToken": "eyJhbG..."
+        }</pre>
+                    </div>
+                </section>
+        
+                <section id="user">
+                    <h2 class="service-title">사용자 API</h2>
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <code>/api/user/register</code>
+                        <h3>회원가입</h3>
+                        <p>Request: (multipart/form-data)</p>
+                        <pre>
+        {
+            "username": "사용자이름",
+            "email": "user@example.com",
+            "password": "password123!",
+            "intro": "자기소개",
+            "imageFile": [파일]
+        }</pre>
+                    </div>
+        
+                    <div class="endpoint">
+                        <span class="method patch">PATCH</span>
+                        <code>/api/user/{userId}/profile</code>
+                        <h3>프로필 수정</h3>
+                        <p>Request: (multipart/form-data)</p>
+                        <pre>
+        {
+            "username": "새이름",
+            "intro": "새자기소개",
+            "profileImageFile": [파일]
+        }</pre>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+    
+
+        <section class="service-section" id="post">
+            <h1 class="service-title">Post Service</h1>
+            <div class="container">
+                <section id="common">
+                    <h2>공통 사항</h2>
+                    <p>기본 URL: <code>http://localhost:8083</code></p>
+                    <p>인증 헤더:</p>
+                    <pre>
+        {
+            "X-Claim-userId": "{userId}"
+        }</pre>
+                </section>
+        
+                <section id="post">
+                    <h2>게시글 API</h2>
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <code>/api/post/write</code>
+                        <h3>게시글 작성</h3>
+                        <p>Request:</p>
+                        <pre>
+        {
+            "title": "게시글 제목",
+            "content": "게시글 내용"
+        }</pre>
+                        <p>Response: (200 OK)</p>
+                        <pre>"작성완료"</pre>
+                    </div>
+        
+                    <div class="endpoint">
+                        <span class="method put">PUT</span>
+                        <code>/api/post/{postId}</code>
+                        <h3>게시글 수정</h3>
+                        <p>Request:</p>
+                        <pre>
+        {
+            "postId": 1,
+            "title": "수정된 제목",
+            "content": "수정된 내용"
+        }</pre>
+                        <p>Response: (200 OK)</p>
+                        <pre>"업데이트 완료"</pre>
+                    </div>
+        
+                    <div class="endpoint">
+                        <span class="method delete">DELETE</span>
+                        <code>/api/post/{postId}</code>
+                        <h3>게시글 삭제</h3>
+                        <p>Response: (200 OK)</p>
+                        <pre>"삭제완료"</pre>
+                    </div>
+                </section>
+        
+                <section id="like">
+                    <h2>좋아요 API</h2>
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <code>/api/post/{postId}/like</code>
+                        <h3>좋아요 추가</h3>
+                        <p>Response: (200 OK)</p>
+                    </div>
+        
+                    <div class="endpoint">
+                        <span class="method delete">DELETE</span>
+                        <code>/api/post/{postId}/like</code>
+                        <h3>좋아요 취소</h3>
+                        <p>Response: (200 OK)</p>
+                    </div>
+                </section>
+        
+                <section id="status">
+                    <h2>상태 관리 API</h2>
+                    <div class="endpoint">
+                        <span class="method get">GET</span>
+                        <code>/api/post/{postId}/status</code>
+                        <h3>게시글 상태 조회</h3>
+                        <p>Response: (200 OK)</p>
+                        <pre>
+        {
+            "likesCount": 10,
+            "commentsCount": 5,
+            "viewsCount": 100
+        }</pre>
+                    </div>
+        
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <code>/api/post/{postId}/view</code>
+                        <h3>조회수 증가</h3>
+                        <p>Response: (200 OK)</p>
+                    </div>
+        
+                    <div class="endpoint">
+                        <span class="method get">GET</span>
+                        <code>/api/post</code>
+                        <h3>게시글 목록 조회</h3>
+                        <p>Query Parameters:</p>
+                        <pre>
+        page: 페이지 번호 (기본값: 0)
+        size: 페이지 크기 (기본값: 10)</pre>
+                        <p>Response: (200 OK)</p>
+                        <pre>
+        [
+            {
+                "id": 1,
+                "title": "게시글 제목",
+                "content": "게시글 내용"
+            }
+        ]</pre>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <!-- Comment Service -->
+<section class="service-section" id="comment">
+    <h1 class="service-title">Comment Service</h1>
+    <div class="container">
+        <section id="common">
+            <h2>공통 사항</h2>
+            <p>Base URL: <code>http://localhost:8084</code></p>
+            <p>Header:</p>
+            <pre>X-Claim-userId: {userId}</pre>
+        </section>
+
+        <section id="comments">
+            <h2>댓글 API</h2>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/post_comments/{postId}</code>
+                <h3>댓글 작성</h3>
+                <p>Request:</p>
+                <pre>
+{
+    "content": "댓글 내용",
+    "parentId": null
+}</pre>
+            </div>
+
+            <div class="endpoint">
+                <span class="method put">PUT</span>
+                <code>/api/post_comments/{postId}/comments/{commentId}</code>
+                <h3>댓글 수정</h3>
+                <p>Request:</p>
+                <pre>
+{
+    "content": "수정된 내용"
+}</pre>
+            </div>
+
+            <div class="endpoint">
+                <span class="method delete">DELETE</span>
+                <code>/api/post_comments/{postId}/{commentId}</code>
+                <h3>댓글 삭제</h3>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/post_comments/{postId}/comments</code>
+                <h3>댓글 목록 조회</h3>
+                <p>Response:</p>
+                <pre>
+[
+    {
+        "id": 1,
+        "content": "댓글 내용",
+        "userId": 1,
+        "createdAt": "2024-03-19T12:00:00"
+    }
+]</pre>
+            </div>
+        </section>
+
+        <section id="comment-like">
+            <h2>좋아요 API</h2>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/post_comments/{postId}/{commentId}/like</code>
+                <h3>좋아요 추가</h3>
+            </div>
+
+            <div class="endpoint">
+                <span class="method delete">DELETE</span>
+                <code>/api/post_comments/{postId}/{commentId}/like</code>
+                <h3>좋아요 취소</h3>
+            </div>
+        </section>
+    </div>
+</section>
+
+        <!-- Activity Service -->
+        <section class="service-section" id="activity">
+            <h1 class="service-title">Activity Service</h1>
+            <section id="activity-alarms">
+                <div class="container">
+                    <h1>Activity Service API 문서</h1>
+            
+                    <section id="common">
+                        <h2>공통 사항</h2>
+                        <p>Base URL: <code>http://localhost:8087</code></p>
+                        <p>인증 헤더:</p>
+                        <pre>X-Claim-userId: {userId}</pre>
+                    </section>
+            
+                    <section id="alarms">
+                        <h2>알림 API</h2>
+                        
+                        <div class="endpoint">
+                            <span class="method get">GET</span>
+                            <code>/alarms</code>
+                            <h3>모든 알림 조회</h3>
+                            <p>Query Parameters:</p>
+                            <pre>userId: Long</pre>
+                            <p>Response: (200 OK)</p>
+                            <pre>
+            [
+                {
+                    "id": 1,
+                    "userId": 1,
+                    "targetId": 100,
+                    "content": "새로운 알림",
+                    "readStatus": false,
+                    "createdAt": "2024-03-19T12:00:00"
+                }
+            ]</pre>
+                        </div>
+            
+                        <div class="endpoint">
+                            <span class="method get">GET</span>
+                            <code>/alarms/unread</code>
+                            <h3>읽지 않은 알림 조회</h3>
+                            <p>Query Parameters:</p>
+                            <pre>userId: Long</pre>
+                            <p>Response: (200 OK)</p>
+                            <pre>
+            [
+                {
+                    "id": 1,
+                    "userId": 1,
+                    "targetId": 100,
+                    "content": "읽지 않은 알림",
+                    "readStatus": false,
+                    "createdAt": "2024-03-19T12:00:00"
+                }
+            ]</pre>
+                        </div>
+            
+                        <div class="endpoint">
+                            <span class="method patch">PATCH</span>
+                            <code>/alarms/{alarmId}/read</code>
+                            <h3>알림 읽음 처리</h3>
+                            <p>Response: (204 No Content)</p>
+                        </div>
+            
+                        <div class="endpoint">
+                            <span class="method get">GET</span>
+                            <code>/alarms/stream/{userId}</code>
+                            <h3>실시간 알림 스트림</h3>
+                            <p>SSE Response:</p>
+                            <pre>
+            data: {
+                "userId": 1,
+                "targetId": 100,
+                "content": "실시간 알림 내용"
+            }</pre>
+                        </div>
+                    </section>
+            
+                    <section id="activity-types">
+                        <h2>활동 유형</h2>
+                        <pre>
+            // 게시글 관련
+            POST_CREATE: "게시글 작성"
+            POST_COMMENT: "게시글 댓글"
+            POST_LIKE: "게시글 좋아요"
+            
+            // 댓글 관련
+            COMMENT_CREATE: "댓글 작성"
+            COMMENT_COMMENT: "대댓글 작성"
+            COMMENT_LIKE: "댓글 좋아요"
+            
+            // 팔로우 관련
+            FOLLOW: "팔로우"
+            UNFOLLOW: "언팔로우"</pre>
+                    </section>
+            
+                    <section id="error-responses">
+                        <h2>에러 응답</h2>
+                        <pre>
+            {
+                "code": "ERROR_CODE",
+                "message": "에러 메시지",
+                "timestamp": "2024-03-19T12:00:00"
+            }</pre>
+                        <p>주요 에러 코드:</p>
+                        <ul>
+                            <li>400: 잘못된 요청</li>
+                            <li>401: 인증 실패</li>
+                            <li>404: 리소스 없음</li>
+                            <li>500: 서버 에러</li>
+                        </ul>
+                    </section>
+                </div>
+            </section>
+        </section>
+    </div>
+
+    <script>
+        // 부드러운 스크롤 이동
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
