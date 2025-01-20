@@ -123,9 +123,9 @@ Docker, Docker Compose
 
 ---
 
-## 기능 플로우
+## 시퀀스 다이어그램
 
-### 유저 활동 기록을 기반으로 한 알림 프로세스 요약 및 기능 플로우
+### 유저 활동 기록을 기반으로 한 알림 프로세스 시퀀스 다이어그램
 
 <table style="border-collapse: collapse; border: none;">
   <tr style="border: none;">
@@ -144,7 +144,7 @@ Docker, Docker Compose
 
 ---
 
-### 실시간 채팅 기능 플로우
+### 실시간 채팅 시퀀스 다이어그램
 
 <div style="text-align: center;">
   <img src="https://github.com/user-attachments/assets/f204db43-9b3b-4c6d-9290-c7cca518159f" alt="실시간 채팅 흐름 이미지" style="width: 600px; height: 600px; object-fit: contain; display: block; margin: auto;" />
