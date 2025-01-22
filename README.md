@@ -38,7 +38,7 @@ Spring WebFlux의 논블로킹 I/O와 Redis 캐싱을 적용해 성능을 최적
 
 
   <summary><span style="font-size: 21px;">📂 System Architecture</span></summary>
-  <img src="https://github.com/user-attachments/assets/3bff9c68-7667-4606-9f19-f7ebdca59a20" alt="Architecture" style="border: none;">
+  <img src="https://github.com/user-attachments/assets/a3f9b54a-ba58-4712-bfbb-5f0d4171ff3c" alt="Architecture" style="border: none;">
 
 
 
